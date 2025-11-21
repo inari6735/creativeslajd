@@ -35,6 +35,10 @@ class Slideshow
     #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $slides;
 
+    #[ORM\ManyToOne(inversedBy: 'slideshows')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->slides = new ArrayCollection();
@@ -121,6 +125,18 @@ class Slideshow
                 $slide->setSlideshow(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

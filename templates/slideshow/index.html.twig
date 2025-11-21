@@ -1,22 +1,22 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Moje pokazy slajdów{% endblock %}
+{% block title %}{{ 'slideshow.title'|trans }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Moje pokazy slajdów</h1>
+    <h1>{{ 'slideshow.title'|trans }}</h1>
     <a href="{{ path('app_slideshow_new') }}" class="btn btn-primary">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Nowy pokaz
+        {{ 'nav.new_show'|trans }}
     </a>
 </div>
 
 {% if slideshows is empty %}
     <div class="empty-state">
         <div class="empty-icon">📽️</div>
-        <h2>Brak pokazów slajdów</h2>
-        <p>Zacznij od utworzenia swojego pierwszego pokazu slajdów</p>
-        <a href="{{ path('app_slideshow_new') }}" class="btn btn-primary btn-lg">Utwórz pierwszy pokaz</a>
+        <h2>{{ 'slideshow.no_shows'|trans }}</h2>
+        <p>{{ 'slideshow.no_shows_text'|trans }}</p>
+        <a href="{{ path('app_slideshow_new') }}" class="btn btn-primary btn-lg">{{ 'slideshow.new'|trans }}</a>
     </div>
 {% else %}
     <div class="slideshow-grid">
@@ -25,9 +25,9 @@
                 <div class="slideshow-card-preview">
                     {% if slideshow.slides|length > 0 %}
                         <img src="{{ asset('uploads/slides/' ~ slideshow.slides.first.imagePath) }}" alt="{{ slideshow.name }}">
-                        <div class="slide-count">{{ slideshow.slides|length }} {% if slideshow.slides|length == 1 %}slajd{% else %}slajdów{% endif %}</div>
+                        <div class="slide-count">{{ 'slideshow.slides_count'|trans({'%count%': slideshow.slides|length}, 'messages') }}</div>
                     {% else %}
-                        <div class="no-slides">Brak slajdów</div>
+                        <div class="no-slides">{{ 'slideshow.no_slides'|trans }}</div>
                     {% endif %}
                 </div>
                 <div class="slideshow-card-body">
@@ -43,21 +43,21 @@
                         <p class="description">{{ slideshow.description|slice(0, 100) }}{% if slideshow.description|length > 100 %}...{% endif %}</p>
                     {% endif %}
                     <div class="slideshow-card-meta">
-                        <small>Utworzono: {{ slideshow.createdAt|date('d.m.Y H:i') }}</small>
+                        <small>{{ 'slideshow.created'|trans }}: {{ slideshow.createdAt|date('d.m.Y H:i') }}</small>
                     </div>
                 </div>
                 <div class="slideshow-card-actions">
                     <a href="{{ path('app_slideshow_edit', {id: slideshow.id}) }}" class="btn btn-secondary btn-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        Edytuj
+                        {{ 'slides.edit_button'|trans }}
                     </a>
                     {% if slideshow.slides|length > 0 %}
                         <a href="{{ path('app_player_show', {id: slideshow.id}) }}" class="btn btn-primary btn-sm" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            Odtwórz
+                            {{ 'slides.play_button'|trans }}
                         </a>
                     {% endif %}
-                    <form method="post" action="{{ path('app_slideshow_delete', {id: slideshow.id}) }}" onsubmit="return confirm('Czy na pewno chcesz usunąć ten pokaz?');" style="display:inline;">
+                    <form method="post" action="{{ path('app_slideshow_delete', {id: slideshow.id}) }}" onsubmit="return confirm('{{ 'slideshow.delete_confirm'|trans|escape('js') }}');" style="display:inline;">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ slideshow.id) }}">
                         <button type="submit" class="btn btn-danger btn-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>

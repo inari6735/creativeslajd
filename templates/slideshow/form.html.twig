@@ -1,10 +1,10 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Nowy pokaz slajdów{% endblock %}
+{% block title %}{{ 'slideshow.new'|trans }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Utwórz nowy pokaz</h1>
+    <h1>{{ 'slideshow.new'|trans }}</h1>
 </div>
 
 <div class="form-container">
@@ -22,8 +22,8 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Utwórz pokaz</button>
-            <a href="{{ path('app_slideshow_index') }}" class="btn btn-secondary">Anuluj</a>
+            <button type="submit" class="btn btn-primary">{{ 'form.create'|trans }}</button>
+            <a href="{{ path('app_slideshow_index') }}" class="btn btn-secondary">{{ 'form.cancel'|trans }}</a>
         </div>
     {{ form_end(form) }}
 </div>

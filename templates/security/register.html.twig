@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Rejestracja - CreativeSlajd{% endblock %}
+{% block title %}{{ 'auth.register'|trans }} - CreativeSlajd{% endblock %}
 
 {% block body %}
 <div class="auth-container">
@@ -8,7 +8,7 @@
         <div class="auth-header">
             <img src="{{ asset('images/cs-logo.png') }}" alt="CS Logo" class="auth-logo">
             <h1><span class="brand-creative">Creative</span><span class="brand-slajd">Slajd</span></h1>
-            <p class="auth-subtitle">Utwórz nowe konto</p>
+            <p class="auth-subtitle">{{ 'auth.register_subtitle'|trans }}</p>
         </div>
 
         {{ form_start(registrationForm) }}
@@ -36,11 +36,11 @@
                 {{ form_errors(registrationForm.agreeTerms) }}
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block btn-lg">Zarejestruj się</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">{{ 'auth.register'|trans }}</button>
         {{ form_end(registrationForm) }}
 
         <div class="auth-footer">
-            <p>Masz już konto? <a href="{{ path('app_login') }}" class="auth-link">Zaloguj się</a></p>
+            <p>{{ 'auth.have_account'|trans }} <a href="{{ path('app_login') }}" class="auth-link">{{ 'auth.login'|trans }}</a></p>
         </div>
     </div>
 </div>

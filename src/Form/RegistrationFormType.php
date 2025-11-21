@@ -20,46 +20,46 @@ class RegistrationFormType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'Adres email',
+                'label' => 'auth.email',
                 'attr' => [
-                    'placeholder' => 'twoj@email.com',
+                    'placeholder' => 'auth.email_placeholder',
                 ],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'first_options' => [
-                    'label' => 'Hasło',
+                    'label' => 'auth.password',
                     'attr' => [
                         'autocomplete' => 'new-password',
-                        'placeholder' => 'Minimum 6 znaków',
+                        'placeholder' => 'auth.password_min',
                     ],
                     'constraints' => [
                         new NotBlank([
-                            'message' => 'Proszę wprowadzić hasło',
+                            'message' => 'auth.password_required',
                         ]),
                         new Length([
                             'min' => 6,
-                            'minMessage' => 'Hasło powinno mieć co najmniej {{ limit }} znaków',
+                            'minMessage' => 'auth.password_min_message',
                             'max' => 4096,
                         ]),
                     ],
                 ],
                 'second_options' => [
-                    'label' => 'Powtórz hasło',
+                    'label' => 'auth.password_repeat',
                     'attr' => [
                         'autocomplete' => 'new-password',
-                        'placeholder' => 'Powtórz hasło',
+                        'placeholder' => 'auth.password_repeat',
                     ],
                 ],
-                'invalid_message' => 'Hasła muszą być identyczne',
+                'invalid_message' => 'auth.password_mismatch',
             ])
             ->add('agreeTerms', CheckboxType::class, [
-                'label' => 'Akceptuję regulamin',
+                'label' => 'auth.agree_terms',
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'Musisz zaakceptować regulamin.',
+                        'message' => 'auth.agree_terms_required',
                     ]),
                 ],
             ])

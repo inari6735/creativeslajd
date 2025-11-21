@@ -1,0 +1,93 @@
+# English translations
+nav:
+  my_shows: 'My Shows'
+  new_show: 'New Show'
+  logout: 'Logout'
+  public_edit_mode: 'Public Edit Mode'
+  back: 'Back to list'
+
+slideshow:
+  title: 'My Slideshows'
+  new: 'Create first slideshow'
+  no_shows: 'No slideshows'
+  no_shows_text: 'Start by creating your first slideshow'
+  edit: 'Edit slideshow'
+  edit_title: 'Edit slideshow'
+  play: 'Play slideshow'
+  delete_confirm: 'Are you sure you want to delete this slideshow?'
+  created: 'Created'
+  slides_count: '{0} no slides|{1} %count% slide|]1,Inf] %count% slides'
+  no_slides: 'No slides'
+  info: 'Slideshow information'
+
+form:
+  name: 'Slideshow name'
+  name_placeholder: 'e.g. Product presentation'
+  name_required: 'Please provide slideshow name'
+  name_min: 'Name must be at least {{ limit }} characters long'
+  name_max: 'Name cannot be longer than {{ limit }} characters'
+  description: 'Description'
+  description_placeholder: 'Optional slideshow description'
+  is_public: 'Share publicly'
+  is_public_help: 'When checked, slideshow will be accessible to everyone via link'
+  is_public_editable: 'Allow public editing'
+  is_public_editable_help: 'When checked, anyone with the edit link can modify this slideshow'
+  save: 'Save changes'
+  create: 'Create slideshow'
+  update: 'Update'
+  cancel: 'Cancel'
+
+slides:
+  title: 'Slides'
+  manager: 'Slides (%count%)'
+  drop_here: 'Click or drag photos here'
+  file_types: 'JPG, PNG, GIF (max 10MB)'
+  add_photos: 'Add photos'
+  delete_confirm: 'Are you sure you want to delete this slide?'
+  selected_files: 'Selected files'
+  files_selected: 'Selected %count% %files%'
+  file: '{1} file|]1,Inf] files'
+  no_slides: 'No slides. Add first photos to the slideshow.'
+  edit_button: 'Edit'
+  play_button: 'Play'
+
+share:
+  public_link: 'Public link (playback)'
+  edit_link: 'Public link (edit)'
+  copy: 'Copy'
+  copied: 'Copied!'
+  public_help: 'This link can be shared with anyone – no login required'
+  edit_help: 'Anyone with this link can edit this slideshow!'
+  warning: 'Warning'
+
+auth:
+  login: 'Login'
+  register: 'Register'
+  login_subtitle: 'Login to your account'
+  register_subtitle: 'Create new account'
+  email: 'Email'
+  email_placeholder: 'your@email.com'
+  password: 'Password'
+  password_min: 'Minimum 6 characters'
+  password_required: 'Please enter password'
+  password_min_message: 'Password should be at least {{ limit }} characters long'
+  password_repeat: 'Repeat password'
+  password_mismatch: 'Passwords must be identical'
+  agree_terms: 'I accept the terms'
+  agree_terms_required: 'You must accept the terms'
+  no_account: "Don't have an account yet?"
+  have_account: 'Already have an account?'
+
+public_edit:
+  mode: 'Public edit mode'
+  public: 'Public'
+  alert: 'You can add, remove and reorder slides. You cannot change the name or description of the slideshow.'
+
+messages:
+  slideshow_created: 'Slideshow has been created!'
+  slideshow_updated: 'Slideshow has been updated!'
+  slideshow_deleted: 'Slideshow has been deleted!'
+  slide_deleted: 'Slide has been deleted!'
+  slides_added: 'Added %count% %slides%'
+  slide_count: '{1} slide|]1,Inf] slides'
+  no_files_selected: 'No files selected'

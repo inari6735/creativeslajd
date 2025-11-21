@@ -18,37 +18,37 @@ class SlideshowType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nazwa pokazu',
+                'label' => 'form.name',
                 'constraints' => [
-                    new NotBlank(['message' => 'Podaj nazwę pokazu']),
+                    new NotBlank(['message' => 'form.name_required']),
                     new Length([
                         'min' => 3,
                         'max' => 255,
-                        'minMessage' => 'Nazwa musi mieć minimum {{ limit }} znaki',
-                        'maxMessage' => 'Nazwa może mieć maksymalnie {{ limit }} znaków',
+                        'minMessage' => 'form.name_min',
+                        'maxMessage' => 'form.name_max',
                     ]),
                 ],
                 'attr' => [
-                    'placeholder' => 'np. Prezentacja produktów'
+                    'placeholder' => 'form.name_placeholder'
                 ]
             ])
             ->add('description', TextareaType::class, [
-                'label' => 'Opis',
+                'label' => 'form.description',
                 'required' => false,
                 'attr' => [
                     'rows' => 4,
-                    'placeholder' => 'Opcjonalny opis pokazu slajdów'
+                    'placeholder' => 'form.description_placeholder'
                 ]
             ])
             ->add('isPublic', CheckboxType::class, [
-                'label' => 'Udostępnij publicznie',
+                'label' => 'form.is_public',
                 'required' => false,
-                'help' => 'Gdy zaznaczone, pokaz będzie dostępny dla wszystkich przez link'
+                'help' => 'form.is_public_help'
             ])
             ->add('isPubliclyEditable', CheckboxType::class, [
-                'label' => 'Pozwól na publiczną edycję',
+                'label' => 'form.is_public_editable',
                 'required' => false,
-                'help' => 'Gdy zaznaczone, każdy kto ma link edycji może modyfikować ten pokaz'
+                'help' => 'form.is_public_editable_help'
             ])
         ;
     }

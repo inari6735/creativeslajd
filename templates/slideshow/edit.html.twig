@@ -1,24 +1,24 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Edycja: {{ slideshow.name }}{% endblock %}
+{% block title %}{{ 'slideshow.edit_title'|trans }}: {{ slideshow.name }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Edytuj pokaz: {{ slideshow.name }}</h1>
+    <h1>{{ 'slideshow.edit_title'|trans }}: {{ slideshow.name }}</h1>
     <div class="edit-button-container">
         {% if slideshow.slides|length > 0 %}
             <a href="{{ path('app_player_show', {id: slideshow.id}) }}" class="btn btn-primary" target="_blank">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                Odtwórz pokaz
+                {{ 'slides.play_button'|trans }}
             </a>
         {% endif %}
-        <a href="{{ path('app_slideshow_index') }}" class="btn btn-secondary">← Powrót do listy</a>
+        <a href="{{ path('app_slideshow_index') }}" class="btn btn-secondary">← {{ 'nav.back'|trans }}</a>
     </div>
 </div>
 
 <div class="edit-grid">
     <div class="edit-form">
-        <h2>Informacje o pokazie</h2>
+        <h2>{{ 'slideshow.info'|trans }}</h2>
         {{ form_start(form, {'attr': {'class': 'slideshow-form'}}) }}
             <div class="form-group">
                 {{ form_label(form.name) }}
@@ -52,7 +52,7 @@
 
             {% if slideshow.isPublic %}
                 <div class="share-link-container" data-controller="clipboard">
-                    <label>Link publiczny (odtwarzanie):</label>
+                    <label>{{ 'share.public_link'|trans }}:</label>
                     <div class="share-link-group">
                         <input type="text" 
                                class="form-control" 
@@ -64,16 +64,16 @@
                                 data-clipboard-target="button"
                                 data-action="click->clipboard#copy">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            Kopiuj
+                            {{ 'share.copy'|trans }}
                         </button>
                     </div>
-                    <small class="share-help">Ten link można udostępnić każdemu – nie wymaga logowania</small>
+                    <small class="share-help">{{ 'share.public_help'|trans }}</small>
                 </div>
             {% endif %}
 
             {% if slideshow.isPubliclyEditable %}
                 <div class="share-link-container" data-controller="clipboard" style="margin-top: var(--space-md); border-color: var(--warning);">
-                    <label>Link publiczny (edycja):</label>
+                    <label>{{ 'share.edit_link'|trans }}:</label>
                     <div class="share-link-group">
                         <input type="text" 
                                class="form-control" 
@@ -85,21 +85,21 @@
                                 data-clipboard-target="button"
                                 data-action="click->clipboard#copy">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            Kopiuj
+                            {{ 'share.copy'|trans }}
                         </button>
                     </div>
-                    <small class="share-help" style="color: var(--warning);"><strong>⚠️ Uwaga:</strong> Każdy z tym linkiem może edytować ten pokaz!</small>
+                    <small class="share-help" style="color: var(--warning);"><strong>⚠️ {{ 'share.warning'|trans }}:</strong> {{ 'share.edit_help'|trans }}</small>
                 </div>
             {% endif %}
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                <button type="submit" class="btn btn-primary">{{ 'form.save'|trans }}</button>
             </div>
         {{ form_end(form) }}
     </div>
 
     <div class="slides-manager">
-        <h2>Slajdy ({{ slideshow.slides|length }})</h2>
+        <h2>{{ 'slides.title'|trans }} ({{ slideshow.slides|length }})</h2>
 
         <form method="post" 
               action="{{ path('app_slide_upload', {id: slideshow.id}) }}" 
@@ -121,12 +121,12 @@
                        data-file-upload-target="label"
                        data-action="dragenter->file-upload#dragEnter dragover->file-upload#dragOver dragleave->file-upload#dragLeave drop->file-upload#drop">
                     <div class="upload-icon">📤</div>
-                    <div class="upload-text" data-file-upload-target="labelText">Kliknij lub przeciągnij zdjęcia tutaj</div>
-                    <small>JPG, PNG, GIF (max 10MB)</small>
+                    <div class="upload-text" data-file-upload-target="labelText">{{ 'slides.drop_here'|trans }}</div>
+                    <small>{{ 'slides.file_types'|trans }}</small>
                 </label>
             </div>
             <div class="selected-files" style="display: none;" data-file-upload-target="filesList"></div>
-            <button type="submit" class="btn btn-primary btn-block">Dodaj zdjęcia</button>
+            <button type="submit" class="btn btn-primary btn-block">{{ 'slides.add_photos'|trans }}</button>
         </form>
 
         {% if slideshow.slides|length > 0 %}
@@ -143,7 +143,7 @@
                         <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="Slide {{ loop.index }}">
                         <div class="slide-overlay">
                             <span class="slide-number">#{{ loop.index }}</span>
-                            <form method="post" action="{{ path('app_slide_delete', {id: slide.id}) }}" onsubmit="return confirm('Czy na pewno chcesz usunąć ten slajd?');">
+                            <form method="post" action="{{ path('app_slide_delete', {id: slide.id}) }}" onsubmit="return confirm('{{ 'slides.delete_confirm'|trans|escape('js') }}');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ slide.id) }}">
                                 <button type="submit" class="btn btn-danger btn-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -155,7 +155,7 @@
             </div>
         {% else %}
             <div class="empty-state-small">
-                <p>Brak slajdów. Dodaj pierwsze zdjęcia do pokazu.</p>
+                <p>{{ 'slides.no_slides'|trans }}</p>
             </div>
         {% endif %}
     </div>

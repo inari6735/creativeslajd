@@ -1,0 +1,53 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Moje pokazy slajdów{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Moje pokazy slajdów</h1>
+    <a href="{{ path('app_slideshow_new') }}" class="btn btn-primary">+ Utwórz nowy pokaz</a>
+</div>
+
+{% if slideshows is empty %}
+    <div class="empty-state">
+        <div class="empty-icon">📽️</div>
+        <h2>Brak pokazów slajdów</h2>
+        <p>Zacznij od utworzenia swojego pierwszego pokazu slajdów</p>
+        <a href="{{ path('app_slideshow_new') }}" class="btn btn-primary btn-lg">Utwórz pierwszy pokaz</a>
+    </div>
+{% else %}
+    <div class="slideshow-grid">
+        {% for slideshow in slideshows %}
+            <div class="slideshow-card">
+                <div class="slideshow-card-preview">
+                    {% if slideshow.slides|length > 0 %}
+                        <img src="{{ asset('uploads/slides/' ~ slideshow.slides.first.imagePath) }}" alt="{{ slideshow.name }}">
+                        <div class="slide-count">{{ slideshow.slides|length }} {% if slideshow.slides|length == 1 %}slajd{% else %}slajdów{% endif %}</div>
+                    {% else %}
+                        <div class="no-slides">Brak slajdów</div>
+                    {% endif %}
+                </div>
+                <div class="slideshow-card-body">
+                    <h3>{{ slideshow.name }}</h3>
+                    {% if slideshow.description %}
+                        <p class="description">{{ slideshow.description|slice(0, 100) }}{% if slideshow.description|length > 100 %}...{% endif %}</p>
+                    {% endif %}
+                    <div class="slideshow-card-meta">
+                        <small>Utworzono: {{ slideshow.createdAt|date('d.m.Y H:i') }}</small>
+                    </div>
+                </div>
+                <div class="slideshow-card-actions">
+                    <a href="{{ path('app_slideshow_edit', {id: slideshow.id}) }}" class="btn btn-secondary btn-sm">✏️ Edytuj</a>
+                    {% if slideshow.slides|length > 0 %}
+                        <a href="{{ path('app_player_show', {id: slideshow.id}) }}" class="btn btn-primary btn-sm" target="_blank">▶️ Odtwórz</a>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_slideshow_delete', {id: slideshow.id}) }}" onsubmit="return confirm('Czy na pewno chcesz usunąć ten pokaz?');" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ slideshow.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

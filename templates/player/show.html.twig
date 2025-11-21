@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+{% set fullscreen = true %}
+
+{% block title %}{{ slideshow.name }} - Player{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div id="slideshow-player" class="slideshow-player" data-slideshow-id="{{ slideshow.id }}">
+    <div class="slides-container">
+        {% for slide in slideshow.slides %}
+            <div class="slide {% if loop.first %}active{% endif %}" data-slide-id="{{ slide.id }}">
+                <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="{{ slideshow.name }} - Slide {{ loop.index }}">
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="player-controls">
+        <div class="control-bar">
+            <button id="prev-btn" class="control-btn" title="Poprzedni (←)">‹</button>
+            <button id="play-pause-btn" class="control-btn" title="Odtwórz/Pauza (Spacja)">▶</button>
+            <button id="next-btn" class="control-btn" title="Następny (→)">›</button>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="slide-counter">
+                <span id="current-slide">1</span> / <span id="total-slides">{{ slideshow.slides|length }}</span>
+            </div>
+            <button id="fullscreen-btn" class="control-btn" title="Pełny ekran (F)">⛶</button>
+            <button id="close-btn" class="control-btn" title="Zamknij (ESC)">✕</button>
+        </div>
+    </div>
+
+    <div class="player-info">
+        <h2>{{ slideshow.name }}</h2>
+        {% if slideshow.description %}
+            <p>{{ slideshow.description }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        const SLIDE_DURATION = 5000; // 5 sekund
+        let currentSlide = 0;
+        let isPlaying = false;
+        let slideInterval = null;
+        let progressInterval = null;
+        let progressWidth = 0;
+
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const closeBtn = document.getElementById('close-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const currentSlideSpan = document.getElementById('current-slide');
+        const playerControls = document.querySelector('.player-controls');
+        const playerInfo = document.querySelector('.player-info');
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            currentSlide = index;
+            currentSlideSpan.textContent = index + 1;
+            resetProgress();
+        }
+
+        function nextSlide() {
+            const next = (currentSlide + 1) % totalSlides;
+            showSlide(next);
+        }
+
+        function prevSlide() {
+            const prev = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(prev);
+        }
+
+        function resetProgress() {
+            progressWidth = 0;
+            progressBar.style.width = '0%';
+        }
+
+        function updateProgress() {
+            progressWidth += (100 / (SLIDE_DURATION / 50));
+            if (progressWidth >= 100) {
+                progressWidth = 100;
+            }
+            progressBar.style.width = progressWidth + '%';
+        }
+
+        function play() {
+            if (isPlaying) return;
+            isPlaying = true;
+            playPauseBtn.textContent = '❚❚';
+            slideInterval = setInterval(nextSlide, SLIDE_DURATION);
+            progressInterval = setInterval(updateProgress, 50);
+        }
+
+        function pause() {
+            if (!isPlaying) return;
+            isPlaying = false;
+            playPauseBtn.textContent = '▶';
+            clearInterval(slideInterval);
+            clearInterval(progressInterval);
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                pause();
+            } else {
+                play();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Event listeners
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        nextBtn.addEventListener('click', () => {
+            pause();
+            nextSlide();
+        });
+        prevBtn.addEventListener('click', () => {
+            pause();
+            prevSlide();
+        });
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        closeBtn.addEventListener('click', () => {
+            window.close();
+            if (window.opener) {
+                window.opener.focus();
+            }
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    pause();
+                    prevSlide();
+                    break;
+                case 'ArrowRight':
+                    pause();
+                    nextSlide();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'Escape':
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        window.close();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen();
+                    break;
+            }
+        });
+
+        // Auto-hide controls
+        let hideTimeout;
+        document.addEventListener('mousemove', () => {
+            playerControls.style.opacity = '1';
+            playerInfo.style.opacity = '1';
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                if (isPlaying) {
+                    playerControls.style.opacity = '0';
+                    playerInfo.style.opacity = '0';
+                }
+            }, 3000);
+        });
+
+        // Auto-start
+        setTimeout(() => play(), 500);
+    </script>
+{% endblock %}

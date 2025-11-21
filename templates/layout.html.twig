@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<nav class="navbar">
+    <div class="container">
+        <a href="{{ path('app_slideshow_index') }}" class="navbar-brand">📽️ Slideshow App</a>
+        <div class="navbar-links">
+            <a href="{{ path('app_slideshow_index') }}" class="nav-link">Moje pokazy</a>
+            <a href="{{ path('app_slideshow_new') }}" class="nav-link btn-primary">+ Nowy pokaz</a>
+        </div>
+    </div>
+</nav>
+
+<main class="main-content">
+    <div class="container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; {{ 'now'|date('Y') }} Slideshow App</p>
+    </div>
+</footer>
+{% endblock %}

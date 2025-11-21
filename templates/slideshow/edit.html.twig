@@ -1,0 +1,82 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Edycja: {{ slideshow.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edytuj pokaz: {{ slideshow.name }}</h1>
+    <div>
+        {% if slideshow.slides|length > 0 %}
+            <a href="{{ path('app_player_show', {id: slideshow.id}) }}" class="btn btn-primary" target="_blank">▶️ Odtwórz pokaz</a>
+        {% endif %}
+        <a href="{{ path('app_slideshow_index') }}" class="btn btn-secondary">← Powrót do listy</a>
+    </div>
+</div>
+
+<div class="edit-grid">
+    <div class="edit-form">
+        <h2>Informacje o pokazie</h2>
+        {{ form_start(form, {'attr': {'class': 'slideshow-form'}}) }}
+            <div class="form-group">
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.name) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.description) }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="slides-manager">
+        <h2>Slajdy ({{ slideshow.slides|length }})</h2>
+        
+        <form method="post" action="{{ path('app_slide_upload', {id: slideshow.id}) }}" enctype="multipart/form-data" class="upload-form">
+            <div class="upload-area">
+                <input type="file" name="images[]" id="images" multiple accept="image/*" class="file-input">
+                <label for="images" class="upload-label">
+                    <div class="upload-icon">📤</div>
+                    <div>Kliknij lub przeciągnij zdjęcia tutaj</div>
+                    <small>JPG, PNG, GIF (max 10MB)</small>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Dodaj zdjęcia</button>
+        </form>
+
+        {% if slideshow.slides|length > 0 %}
+            <div class="slides-grid" id="slides-grid" data-slideshow-id="{{ slideshow.id }}">
+                {% for slide in slideshow.slides %}
+                    <div class="slide-item" data-slide-id="{{ slide.id }}" draggable="true">
+                        <div class="slide-handle">⋮⋮</div>
+                        <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="Slide {{ loop.index }}">
+                        <div class="slide-overlay">
+                            <span class="slide-number">#{{ loop.index }}</span>
+                            <form method="post" action="{{ path('app_slide_delete', {id: slide.id}) }}" onsubmit="return confirm('Czy na pewno chcesz usunąć ten slajd?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ slide.id) }}">
+                                <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-small">
+                <p>Brak slajdów. Dodaj pierwsze zdjęcia do pokazu.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/drag-drop.js') }}" defer></script>
+{% endblock %}

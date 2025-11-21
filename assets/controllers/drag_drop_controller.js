@@ -6,7 +6,6 @@ export default class extends Controller {
     }
 
     connect() {
-        console.log('Drag & drop controller connected');
         this.draggedElement = null;
     }
 
@@ -15,7 +14,6 @@ export default class extends Controller {
         this.draggedElement.classList.add('dragging');
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/html', event.currentTarget.innerHTML);
-        console.log('Drag started:', this.draggedElement.dataset.slideId);
     }
 
     dragOver(event) {
@@ -51,14 +49,11 @@ export default class extends Controller {
         this.element.querySelectorAll('.slide-item').forEach(item => {
             item.classList.remove('drag-over');
         });
-        
-        console.log('Drop completed');
     }
 
     dragEnd(event) {
         if (this.draggedElement) {
             this.draggedElement.classList.remove('dragging');
-            console.log('Drag ended');
             
             // Update slide numbers
             this.updateSlideNumbers();
@@ -97,9 +92,7 @@ export default class extends Controller {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                console.log('Order saved successfully');
-            }
+            // Order saved successfully
         })
         .catch(error => {
             console.error('Error saving order:', error);

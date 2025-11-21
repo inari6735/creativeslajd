@@ -4,7 +4,6 @@ export default class extends Controller {
     static targets = ['input', 'label', 'labelText', 'filesList']
     
     connect() {
-        console.log('File upload controller connected');
         this.setupDragAndDrop();
     }
 
@@ -50,12 +49,10 @@ export default class extends Controller {
         if (files.length > 0) {
             this.inputTarget.files = files;
             this.updateFileList(files);
-            console.log('Files dropped:', files.length);
         }
     }
 
     change(event) {
-        console.log('File input changed, files:', event.target.files.length);
         this.updateFileList(event.target.files);
     }
 

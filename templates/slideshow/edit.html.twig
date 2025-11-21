@@ -80,12 +80,13 @@
             <div class="upload-area">
                 <input type="file" 
                        name="images[]" 
+                       id="images"
                        multiple 
                        accept="image/*" 
                        class="file-input"
                        data-file-upload-target="input"
                        data-action="change->file-upload#change">
-                <label for="images" 
+                <label for="images"
                        class="upload-label" 
                        data-file-upload-target="label"
                        data-action="dragenter->file-upload#dragEnter dragover->file-upload#dragOver dragleave->file-upload#dragLeave drop->file-upload#drop">

@@ -906,6 +906,82 @@ p {
     cursor: pointer;
 }
 
+.form-help {
+    display: block;
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    margin-top: var(--space-xs);
+}
+
+/* === Share Link === */
+.share-link-container {
+    margin-top: var(--space-lg);
+    padding: var(--space-lg);
+    background-color: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+}
+
+.share-link-container label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    color: var(--gray-900);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.share-link-group {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.share-link-group input[type="text"] {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8125rem;
+    background-color: white;
+}
+
+.share-help {
+    display: block;
+    color: var(--gray-600);
+    font-size: 0.75rem;
+    margin-top: var(--space-sm);
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+
+/* === Badges === */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-public {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.badge-public svg {
+    width: 12px;
+    height: 12px;
+}
+
 /* === Responsive === */
 @media (max-width: 768px) {
     .container {

@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Slideshow;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -38,6 +39,11 @@ class SlideshowType extends AbstractType
                     'rows' => 4,
                     'placeholder' => 'Opcjonalny opis pokazu slajdów'
                 ]
+            ])
+            ->add('isPublic', CheckboxType::class, [
+                'label' => 'Udostępnij publicznie',
+                'required' => false,
+                'help' => 'Gdy zaznaczone, pokaz będzie dostępny dla wszystkich przez link'
             ])
         ;
     }

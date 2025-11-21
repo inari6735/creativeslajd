@@ -39,11 +39,18 @@ class Slideshow
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isPublic = false;
+
+    #[ORM\Column(length: 32, unique: true)]
+    private ?string $shareToken = null;
+
     public function __construct()
     {
         $this->slides = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->shareToken = bin2hex(random_bytes(16));
     }
 
     public function getId(): ?int
@@ -137,6 +144,30 @@ class Slideshow
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->isPublic;
+    }
+
+    public function setIsPublic(bool $isPublic): static
+    {
+        $this->isPublic = $isPublic;
+
+        return $this;
+    }
+
+    public function getShareToken(): ?string
+    {
+        return $this->shareToken;
+    }
+
+    public function setShareToken(string $shareToken): static
+    {
+        $this->shareToken = $shareToken;
 
         return $this;
     }

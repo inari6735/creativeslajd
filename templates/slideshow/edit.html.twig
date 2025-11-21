@@ -32,6 +32,33 @@
                 {{ form_errors(form.description) }}
             </div>
 
+            <div class="form-group form-checkbox">
+                {{ form_widget(form.isPublic) }}
+                {{ form_label(form.isPublic) }}
+                {{ form_errors(form.isPublic) }}
+                {% if form.isPublic.vars.help %}
+                    <small class="form-help">{{ form.isPublic.vars.help }}</small>
+                {% endif %}
+            </div>
+
+            {% if slideshow.isPublic %}
+                <div class="share-link-container">
+                    <label>Link publiczny:</label>
+                    <div class="share-link-group">
+                        <input type="text" 
+                               id="shareLink" 
+                               class="form-control" 
+                               value="{{ url('app_public_player_show', {shareToken: slideshow.shareToken}) }}" 
+                               readonly>
+                        <button type="button" class="btn btn-secondary" id="copyLinkBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            Kopiuj
+                        </button>
+                    </div>
+                    <small class="share-help">Ten link można udostępnić każdemu – nie wymaga logowania</small>
+                </div>
+            {% endif %}
+
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
             </div>
@@ -86,4 +113,33 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="{{ asset('js/drag-drop.js') }}" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyBtn = document.getElementById('copyLinkBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    const shareLink = document.getElementById('shareLink');
+                    shareLink.select();
+                    shareLink.setSelectionRange(0, 99999); // For mobile devices
+                    
+                    navigator.clipboard.writeText(shareLink.value).then(function() {
+                        // Zmień tekst przycisku na chwilę
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Skopiowano!';
+                        copyBtn.classList.add('btn-success');
+                        copyBtn.classList.remove('btn-secondary');
+                        
+                        setTimeout(function() {
+                            copyBtn.innerHTML = originalText;
+                            copyBtn.classList.remove('btn-success');
+                            copyBtn.classList.add('btn-secondary');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('Błąd kopiowania: ', err);
+                        alert('Nie udało się skopiować linku');
+                    });
+                });
+            }
+        });
+    </script>
 {% endblock %}

@@ -39,14 +39,16 @@
         <h2>Slajdy ({{ slideshow.slides|length }})</h2>
         
         <form method="post" action="{{ path('app_slide_upload', {id: slideshow.id}) }}" enctype="multipart/form-data" class="upload-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('upload' ~ slideshow.id) }}">
             <div class="upload-area">
                 <input type="file" name="images[]" id="images" multiple accept="image/*" class="file-input">
-                <label for="images" class="upload-label">
+                <label for="images" class="upload-label" id="upload-label">
                     <div class="upload-icon">📤</div>
-                    <div>Kliknij lub przeciągnij zdjęcia tutaj</div>
+                    <div class="upload-text">Kliknij lub przeciągnij zdjęcia tutaj</div>
                     <small>JPG, PNG, GIF (max 10MB)</small>
                 </label>
             </div>
+            <div id="selected-files" class="selected-files" style="display: none;"></div>
             <button type="submit" class="btn btn-primary btn-block">Dodaj zdjęcia</button>
         </form>
 

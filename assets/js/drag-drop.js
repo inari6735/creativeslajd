@@ -97,15 +97,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // File input preview
     const fileInput = document.getElementById('images');
+    const selectedFilesDiv = document.getElementById('selected-files');
+    
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             const files = e.target.files;
-            const label = document.querySelector('.upload-label');
+            const label = document.getElementById('upload-label');
+            const textDiv = label.querySelector('.upload-text');
             
             if (files.length > 0) {
-                label.querySelector('div').textContent = `Wybrano ${files.length} ${files.length === 1 ? 'plik' : 'plików'}`;
+                // Update label text
+                if (textDiv) {
+                    textDiv.innerHTML = `<strong style="color: #c8433b;">Wybrano ${files.length} ${files.length === 1 ? 'plik' : 'plików'}</strong>`;
+                }
                 label.style.borderColor = '#c8433b';
                 label.style.backgroundColor = '#f5f5f5';
+                
+                // Show file list
+                if (selectedFilesDiv) {
+                    selectedFilesDiv.style.display = 'block';
+                    selectedFilesDiv.innerHTML = '<h4 style="margin: 1rem 0 0.5rem 0; color: #333;">Wybrane pliki:</h4><ul style="margin: 0; padding-left: 1.5rem;">';
+                    
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        selectedFilesDiv.innerHTML += `<li style="margin: 0.25rem 0; color: #666;">${file.name} <span style="color: #999;">(${fileSize} MB)</span></li>`;
+                    }
+                    
+                    selectedFilesDiv.innerHTML += '</ul>';
+                }
+            } else {
+                // Reset if no files
+                if (textDiv) {
+                    textDiv.textContent = 'Kliknij lub przeciągnij zdjęcia tutaj';
+                }
+                label.style.borderColor = '#ddd';
+                label.style.backgroundColor = 'transparent';
+                if (selectedFilesDiv) {
+                    selectedFilesDiv.style.display = 'none';
+                }
             }
         });
     }

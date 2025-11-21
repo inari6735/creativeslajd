@@ -610,3 +610,30 @@ body {
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
+
+/* Selected Files List */
+.selected-files {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--light-gray);
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-red);
+}
+
+.selected-files h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-gray);
+    font-size: 1rem;
+}
+
+.selected-files ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    list-style: disc;
+}
+
+.selected-files li {
+    margin: 0.25rem 0;
+    color: var(--medium-gray);
+    font-size: 0.9rem;
+}

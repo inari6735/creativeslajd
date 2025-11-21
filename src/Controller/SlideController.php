@@ -25,7 +25,8 @@ class SlideController extends AbstractController
     ): Response {
         $files = $request->files->get('images');
         
-        if (!$files) {
+        // Debug: sprawdź co przychodzi
+        if (!$files || (is_array($files) && count($files) === 0)) {
             $this->addFlash('error', 'Nie wybrano żadnych plików');
             return $this->redirectToRoute('app_slideshow_edit', ['id' => $slideshow->getId()]);
         }

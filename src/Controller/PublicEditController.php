@@ -16,12 +16,10 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/edit')]
 class PublicEditController extends AbstractController
 {
-    #[Route('/{editToken}', name: 'app_public_edit_show', methods: ['GET', 'POST'])]
+    #[Route('/{editToken}', name: 'app_public_edit_show', methods: ['GET'])]
     public function edit(
         string $editToken,
-        Request $request,
-        SlideshowRepository $repository,
-        EntityManagerInterface $entityManager
+        SlideshowRepository $repository
     ): Response {
         $slideshow = $repository->findOneBy(['editToken' => $editToken]);
         
@@ -33,21 +31,8 @@ class PublicEditController extends AbstractController
             throw $this->createAccessDeniedException('Ten pokaz nie jest publicznie edytowalny.');
         }
 
-        $form = $this->createForm(SlideshowType::class, $slideshow);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $slideshow->setUpdatedAt(new \DateTimeImmutable());
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Pokaz został zaktualizowany!');
-
-            return $this->redirectToRoute('app_public_edit_show', ['editToken' => $editToken]);
-        }
-
         return $this->render('public_edit/edit.html.twig', [
             'slideshow' => $slideshow,
-            'form' => $form,
             'editToken' => $editToken,
         ]);
     }

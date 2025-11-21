@@ -37,33 +37,12 @@
             </div>
         </div>
 
-        <div class="edit-grid">
-            <div class="edit-form">
-                <h2>Informacje o pokazie</h2>
-                {{ form_start(form, {'attr': {'class': 'slideshow-form'}}) }}
-                    <div class="form-group">
-                        {{ form_label(form.name) }}
-                        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.name) }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.description) }}
-                        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.description) }}
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
-                    </div>
-                {{ form_end(form) }}
-                
-                <div class="alert" style="margin-top: var(--space-lg); background-color: #fff3cd; border-color: #ffc107; color: #856404;">
-                    <strong>⚠️ Tryb publiczny:</strong> Każdy z tym linkiem może edytować ten pokaz. Nie udostępniaj tego linku osobom, którym nie ufasz.
-                </div>
-            </div>
-
+        <div class="edit-grid" style="grid-template-columns: 1fr;">
             <div class="slides-manager">
+                <div class="alert" style="margin-bottom: var(--space-lg); background-color: #fff3cd; border-color: #ffc107; color: #856404;">
+                    <strong>⚠️ Tryb publicznej edycji:</strong> Możesz dodawać, usuwać i zmieniać kolejność slajdów. Nie możesz zmieniać nazwy ani opisu pokazu.
+                </div>
+                
                 <h2>Slajdy ({{ slideshow.slides|length }})</h2>
                 
                 <form method="post" 

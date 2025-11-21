@@ -114,6 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadLabel = document.getElementById('upload-label');
     const uploadForm = document.querySelector('.upload-form');
     
+    console.log('File upload initialized');
+    console.log('File input:', fileInput);
+    console.log('Upload label:', uploadLabel);
+    console.log('Selected files div:', selectedFilesDiv);
+    
     // Prevent default drag behaviors ONLY for file drops outside upload area
     // This prevents accidental file opening in browser
     ['dragenter', 'dragover'].forEach(eventName => {
@@ -168,44 +173,57 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    if (fileInput) {
-        fileInput.addEventListener('change', function(e) {
-            const files = e.target.files;
-            const label = document.getElementById('upload-label');
-            const textDiv = label.querySelector('.upload-text');
-            
-            if (files.length > 0) {
-                // Update label text
-                if (textDiv) {
-                    textDiv.innerHTML = `<strong style="color: #c8433b;">Wybrano ${files.length} ${files.length === 1 ? 'plik' : 'plików'}</strong>`;
-                }
+    function updateFileList(files) {
+        const label = document.getElementById('upload-label');
+        const textDiv = label ? label.querySelector('.upload-text') : null;
+        
+        if (files && files.length > 0) {
+            // Update label text
+            if (textDiv) {
+                textDiv.innerHTML = `<strong style="color: #c8433b;">Wybrano ${files.length} ${files.length === 1 ? 'plik' : 'plików'}</strong>`;
+            }
+            if (label) {
                 label.style.borderColor = '#c8433b';
                 label.style.backgroundColor = '#f5f5f5';
+            }
+            
+            // Show file list
+            if (selectedFilesDiv) {
+                selectedFilesDiv.style.display = 'block';
+                selectedFilesDiv.innerHTML = '<h4 style="margin: 1rem 0 0.5rem 0; color: #333;">Wybrane pliki:</h4><ul style="margin: 0; padding-left: 1.5rem;">';
                 
-                // Show file list
-                if (selectedFilesDiv) {
-                    selectedFilesDiv.style.display = 'block';
-                    selectedFilesDiv.innerHTML = '<h4 style="margin: 1rem 0 0.5rem 0; color: #333;">Wybrane pliki:</h4><ul style="margin: 0; padding-left: 1.5rem;">';
-                    
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                        selectedFilesDiv.innerHTML += `<li style="margin: 0.25rem 0; color: #666;">${file.name} <span style="color: #999;">(${fileSize} MB)</span></li>`;
-                    }
-                    
-                    selectedFilesDiv.innerHTML += '</ul>';
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    selectedFilesDiv.innerHTML += `<li style="margin: 0.25rem 0; color: #666;">${file.name} <span style="color: #999;">(${fileSize} MB)</span></li>`;
                 }
-            } else {
-                // Reset if no files
-                if (textDiv) {
-                    textDiv.textContent = 'Kliknij lub przeciągnij zdjęcia tutaj';
-                }
+                
+                selectedFilesDiv.innerHTML += '</ul>';
+            }
+        } else {
+            // Reset if no files
+            if (textDiv) {
+                textDiv.textContent = 'Kliknij lub przeciągnij zdjęcia tutaj';
+            }
+            if (label) {
                 label.style.borderColor = '#ddd';
                 label.style.backgroundColor = 'transparent';
-                if (selectedFilesDiv) {
-                    selectedFilesDiv.style.display = 'none';
-                }
             }
+            if (selectedFilesDiv) {
+                selectedFilesDiv.style.display = 'none';
+            }
+        }
+    }
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            console.log('File input changed, files:', e.target.files.length);
+            updateFileList(e.target.files);
         });
+        
+        // Check on page load if there are any files (shouldn't be after reload, but just in case)
+        if (fileInput.files && fileInput.files.length > 0) {
+            updateFileList(fileInput.files);
+        }
     }
 });

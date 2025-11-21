@@ -438,6 +438,10 @@ body {
     overflow: hidden;
     cursor: grab;
     transition: transform 0.2s, opacity 0.2s, border 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    border: 2px solid transparent;
 }
 
 .slide-item:active {
@@ -463,13 +467,22 @@ body {
     position: absolute;
     top: 5px;
     left: 5px;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.7);
     color: var(--white);
-    padding: 0.25rem;
-    border-radius: 3px;
-    font-size: 0.8rem;
-    cursor: move;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: grab;
     z-index: 10;
+    transition: background-color 0.2s;
+}
+
+.slide-handle:hover {
+    background-color: var(--primary-red);
+}
+
+.slide-handle:active {
+    cursor: grabbing;
 }
 
 .slide-item img {

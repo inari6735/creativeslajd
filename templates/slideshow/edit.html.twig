@@ -42,15 +42,18 @@
             </div>
 
             {% if slideshow.isPublic %}
-                <div class="share-link-container">
+                <div class="share-link-container" data-controller="clipboard">
                     <label>Link publiczny:</label>
                     <div class="share-link-group">
                         <input type="text" 
-                               id="shareLink" 
                                class="form-control" 
                                value="{{ url('app_public_player_show', {shareToken: slideshow.shareToken}) }}" 
+                               data-clipboard-target="source"
                                readonly>
-                        <button type="button" class="btn btn-secondary" id="copyLinkBtn">
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                data-clipboard-target="button"
+                                data-action="click->clipboard#copy">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             Kopiuj
                         </button>
@@ -68,24 +71,43 @@
     <div class="slides-manager">
         <h2>Slajdy ({{ slideshow.slides|length }})</h2>
 
-        <form method="post" action="{{ path('app_slide_upload', {id: slideshow.id}) }}" enctype="multipart/form-data" class="upload-form">
+        <form method="post" 
+              action="{{ path('app_slide_upload', {id: slideshow.id}) }}" 
+              enctype="multipart/form-data" 
+              class="upload-form"
+              data-controller="file-upload">
             <input type="hidden" name="_token" value="{{ csrf_token('upload' ~ slideshow.id) }}">
             <div class="upload-area">
-                <input type="file" name="images[]" id="images" multiple accept="image/*" class="file-input">
-                <label for="images" class="upload-label" id="upload-label">
+                <input type="file" 
+                       name="images[]" 
+                       multiple 
+                       accept="image/*" 
+                       class="file-input"
+                       data-file-upload-target="input"
+                       data-action="change->file-upload#change">
+                <label for="images" 
+                       class="upload-label" 
+                       data-file-upload-target="label"
+                       data-action="dragenter->file-upload#dragEnter dragover->file-upload#dragOver dragleave->file-upload#dragLeave drop->file-upload#drop">
                     <div class="upload-icon">📤</div>
-                    <div class="upload-text">Kliknij lub przeciągnij zdjęcia tutaj</div>
+                    <div class="upload-text" data-file-upload-target="labelText">Kliknij lub przeciągnij zdjęcia tutaj</div>
                     <small>JPG, PNG, GIF (max 10MB)</small>
                 </label>
             </div>
-            <div id="selected-files" class="selected-files" style="display: none;"></div>
+            <div class="selected-files" style="display: none;" data-file-upload-target="filesList"></div>
             <button type="submit" class="btn btn-primary btn-block">Dodaj zdjęcia</button>
         </form>
 
         {% if slideshow.slides|length > 0 %}
-            <div class="slides-grid" id="slides-grid" data-slideshow-id="{{ slideshow.id }}">
+            <div class="slides-grid" 
+                 data-controller="drag-drop" 
+                 data-drag-drop-slideshow-id-value="{{ slideshow.id }}"
+                 data-action="dragover->drag-drop#dragOver drop->drag-drop#drop">
                 {% for slide in slideshow.slides %}
-                    <div class="slide-item" data-slide-id="{{ slide.id }}" draggable="true">
+                    <div class="slide-item" 
+                         data-slide-id="{{ slide.id }}" 
+                         draggable="true"
+                         data-action="dragstart->drag-drop#dragStart dragend->drag-drop#dragEnd">
                         <div class="slide-handle">⋮⋮</div>
                         <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="Slide {{ loop.index }}">
                         <div class="slide-overlay">
@@ -112,34 +134,4 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="{{ asset('js/drag-drop.js') }}" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const copyBtn = document.getElementById('copyLinkBtn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', function() {
-                    const shareLink = document.getElementById('shareLink');
-                    shareLink.select();
-                    shareLink.setSelectionRange(0, 99999); // For mobile devices
-                    
-                    navigator.clipboard.writeText(shareLink.value).then(function() {
-                        // Zmień tekst przycisku na chwilę
-                        const originalText = copyBtn.innerHTML;
-                        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Skopiowano!';
-                        copyBtn.classList.add('btn-success');
-                        copyBtn.classList.remove('btn-secondary');
-                        
-                        setTimeout(function() {
-                            copyBtn.innerHTML = originalText;
-                            copyBtn.classList.remove('btn-success');
-                            copyBtn.classList.add('btn-secondary');
-                        }, 2000);
-                    }).catch(function(err) {
-                        console.error('Błąd kopiowania: ', err);
-                        alert('Nie udało się skopiować linku');
-                    });
-                });
-            }
-        });
-    </script>
 {% endblock %}

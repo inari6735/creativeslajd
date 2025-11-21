@@ -52,7 +52,10 @@
 
 {% block javascripts %}
     <script>
-        const SLIDE_DURATION = 5000; // 5 sekund
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Player script loaded');
+            
+            const SLIDE_DURATION = 5000; // 5 sekund
         let currentSlide = 0;
         let isPlaying = false;
         let slideInterval = null;
@@ -61,6 +64,9 @@
 
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
+        
+        console.log('Total slides:', totalSlides);
+        console.log('Slides found:', slides);
         const playPauseBtn = document.getElementById('play-pause-btn');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -70,6 +76,12 @@
         const currentSlideSpan = document.getElementById('current-slide');
         const playerControls = document.querySelector('.player-controls');
         const playerInfo = document.querySelector('.player-info');
+        
+        if (!playPauseBtn) console.error('Play button not found!');
+        if (totalSlides === 0) {
+            console.error('No slides found!');
+            alert('Brak slajdów do wyświetlenia');
+        }
 
         function showSlide(index) {
             slides.forEach((slide, i) => {
@@ -107,11 +119,16 @@
         }
 
         function play() {
-            if (isPlaying) return;
+            console.log('Play function called');
+            if (isPlaying) {
+                console.log('Already playing, returning');
+                return;
+            }
             isPlaying = true;
             playPauseBtn.textContent = '❚❚';
             slideInterval = setInterval(nextSlide, SLIDE_DURATION);
             progressInterval = setInterval(updateProgress, 50);
+            console.log('Playback started');
         }
 
         function pause() {
@@ -201,7 +218,8 @@
             }, 3000);
         });
 
-        // Auto-start
-        setTimeout(() => play(), 500);
+            // Auto-start
+            setTimeout(() => play(), 500);
+        }); // end DOMContentLoaded
     </script>
 {% endblock %}

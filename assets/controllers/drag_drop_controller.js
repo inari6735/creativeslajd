@@ -2,7 +2,8 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static values = {
-        slideshowId: String
+        slideshowId: String,
+        reorderUrl: String
     }
 
     connect() {
@@ -83,7 +84,10 @@ export default class extends Controller {
             order.push(parseInt(slide.dataset.slideId));
         });
 
-        fetch(`/slide/reorder/${this.slideshowIdValue}`, {
+        // Use custom reorder URL if provided, otherwise use default
+        const url = this.hasReorderUrlValue ? this.reorderUrlValue : `/slide/reorder/${this.slideshowIdValue}`;
+
+        fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -41,9 +41,18 @@
                 {% endif %}
             </div>
 
+            <div class="form-group form-checkbox">
+                {{ form_widget(form.isPubliclyEditable) }}
+                {{ form_label(form.isPubliclyEditable) }}
+                {{ form_errors(form.isPubliclyEditable) }}
+                {% if form.isPubliclyEditable.vars.help %}
+                    <small class="form-help">{{ form.isPubliclyEditable.vars.help }}</small>
+                {% endif %}
+            </div>
+
             {% if slideshow.isPublic %}
                 <div class="share-link-container" data-controller="clipboard">
-                    <label>Link publiczny:</label>
+                    <label>Link publiczny (odtwarzanie):</label>
                     <div class="share-link-group">
                         <input type="text" 
                                class="form-control" 
@@ -59,6 +68,27 @@
                         </button>
                     </div>
                     <small class="share-help">Ten link można udostępnić każdemu – nie wymaga logowania</small>
+                </div>
+            {% endif %}
+
+            {% if slideshow.isPubliclyEditable %}
+                <div class="share-link-container" data-controller="clipboard" style="margin-top: var(--space-md); border-color: var(--warning);">
+                    <label>Link publiczny (edycja):</label>
+                    <div class="share-link-group">
+                        <input type="text" 
+                               class="form-control" 
+                               value="{{ url('app_public_edit_show', {editToken: slideshow.editToken}) }}" 
+                               data-clipboard-target="source"
+                               readonly>
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                data-clipboard-target="button"
+                                data-action="click->clipboard#copy">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            Kopiuj
+                        </button>
+                    </div>
+                    <small class="share-help" style="color: var(--warning);"><strong>⚠️ Uwaga:</strong> Każdy z tym linkiem może edytować ten pokaz!</small>
                 </div>
             {% endif %}
 

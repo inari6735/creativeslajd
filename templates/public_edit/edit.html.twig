@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edycja: {{ slideshow.name }} (Publiczna){% endblock %}
+
+{% block body %}
+<nav class="navbar">
+    <div class="container">
+        <a href="#" class="navbar-brand">
+            <img src="{{ asset('images/cs-logo.png') }}" alt="CS Logo" class="navbar-logo">
+            <span class="brand-creative">Creative</span><span class="brand-slajd">Slajd</span>
+        </a>
+        <div class="navbar-links">
+            <span class="nav-link" style="color: var(--cs-red); font-weight: 600;">Tryb publicznej edycji</span>
+        </div>
+    </div>
+</nav>
+
+<main class="main-content">
+    <div class="container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="page-header">
+            <h1>Edytuj pokaz: {{ slideshow.name }}</h1>
+            <div>
+                {% if slideshow.slides|length > 0 %}
+                    <a href="{{ path('app_public_player_show', {shareToken: slideshow.shareToken}) }}" class="btn btn-primary" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Odtwórz pokaz
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="edit-grid">
+            <div class="edit-form">
+                <h2>Informacje o pokazie</h2>
+                {{ form_start(form, {'attr': {'class': 'slideshow-form'}}) }}
+                    <div class="form-group">
+                        {{ form_label(form.name) }}
+                        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.name) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                    </div>
+                {{ form_end(form) }}
+                
+                <div class="alert" style="margin-top: var(--space-lg); background-color: #fff3cd; border-color: #ffc107; color: #856404;">
+                    <strong>⚠️ Tryb publiczny:</strong> Każdy z tym linkiem może edytować ten pokaz. Nie udostępniaj tego linku osobom, którym nie ufasz.
+                </div>
+            </div>
+
+            <div class="slides-manager">
+                <h2>Slajdy ({{ slideshow.slides|length }})</h2>
+                
+                <form method="post" 
+                      action="{{ path('app_public_edit_upload', {editToken: editToken}) }}" 
+                      enctype="multipart/form-data" 
+                      class="upload-form"
+                      data-controller="file-upload">
+                    <input type="hidden" name="_token" value="{{ csrf_token('upload' ~ slideshow.id) }}">
+                    <div class="upload-area">
+                        <input type="file" 
+                               name="images[]" 
+                               id="images"
+                               multiple 
+                               accept="image/*" 
+                               class="file-input"
+                               data-file-upload-target="input"
+                               data-action="change->file-upload#change">
+                        <label for="images" 
+                               class="upload-label" 
+                               data-file-upload-target="label"
+                               data-action="dragenter->file-upload#dragEnter dragover->file-upload#dragOver dragleave->file-upload#dragLeave drop->file-upload#drop">
+                            <div class="upload-icon">📤</div>
+                            <div class="upload-text" data-file-upload-target="labelText">Kliknij lub przeciągnij zdjęcia tutaj</div>
+                            <small>JPG, PNG, GIF (max 10MB)</small>
+                        </label>
+                    </div>
+                    <div class="selected-files" style="display: none;" data-file-upload-target="filesList"></div>
+                    <button type="submit" class="btn btn-primary btn-block">Dodaj zdjęcia</button>
+                </form>
+
+                {% if slideshow.slides|length > 0 %}
+                    <div class="slides-grid" 
+                         data-controller="drag-drop" 
+                         data-drag-drop-slideshow-id-value="{{ slideshow.id }}"
+                         data-drag-drop-reorder-url-value="{{ path('app_public_edit_reorder', {editToken: editToken}) }}"
+                         data-action="dragover->drag-drop#dragOver drop->drag-drop#drop">
+                        {% for slide in slideshow.slides %}
+                            <div class="slide-item" 
+                                 data-slide-id="{{ slide.id }}" 
+                                 draggable="true"
+                                 data-action="dragstart->drag-drop#dragStart dragend->drag-drop#dragEnd">
+                                <div class="slide-handle">⋮⋮</div>
+                                <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="Slide {{ loop.index }}">
+                                <div class="slide-overlay">
+                                    <span class="slide-number">#{{ loop.index }}</span>
+                                    <form method="post" action="{{ path('app_public_edit_delete_slide', {editToken: editToken, slideId: slide.id}) }}" onsubmit="return confirm('Czy na pewno chcesz usunąć ten slajd?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ slide.id) }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state-small">
+                        <p>Brak slajdów. Dodaj pierwsze zdjęcia do pokazu.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; {{ 'now'|date('Y') }} <span class="brand-creative">Creative</span><span class="brand-slajd">Slajd</span></p>
+    </div>
+</footer>
+{% endblock %}

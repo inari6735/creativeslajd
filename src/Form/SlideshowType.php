@@ -45,6 +45,11 @@ class SlideshowType extends AbstractType
                 'required' => false,
                 'help' => 'Gdy zaznaczone, pokaz będzie dostępny dla wszystkich przez link'
             ])
+            ->add('isPubliclyEditable', CheckboxType::class, [
+                'label' => 'Pozwól na publiczną edycję',
+                'required' => false,
+                'help' => 'Gdy zaznaczone, każdy kto ma link edycji może modyfikować ten pokaz'
+            ])
         ;
     }
 

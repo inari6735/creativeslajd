@@ -45,12 +45,19 @@ class Slideshow
     #[ORM\Column(length: 32, unique: true)]
     private ?string $shareToken = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isPubliclyEditable = false;
+
+    #[ORM\Column(length: 32, unique: true)]
+    private ?string $editToken = null;
+
     public function __construct()
     {
         $this->slides = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->shareToken = bin2hex(random_bytes(16));
+        $this->editToken = bin2hex(random_bytes(16));
     }
 
     public function getId(): ?int
@@ -168,6 +175,30 @@ class Slideshow
     public function setShareToken(string $shareToken): static
     {
         $this->shareToken = $shareToken;
+
+        return $this;
+    }
+
+    public function isPubliclyEditable(): bool
+    {
+        return $this->isPubliclyEditable;
+    }
+
+    public function setIsPubliclyEditable(bool $isPubliclyEditable): static
+    {
+        $this->isPubliclyEditable = $isPubliclyEditable;
+
+        return $this;
+    }
+
+    public function getEditToken(): ?string
+    {
+        return $this->editToken;
+    }
+
+    public function setEditToken(string $editToken): static
+    {
+        $this->editToken = $editToken;
 
         return $this;
     }

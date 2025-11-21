@@ -638,9 +638,10 @@ p {
     padding: var(--space-md);
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: end;
     opacity: 0;
     transition: opacity 0.2s;
+    height: 100%;
 }
 
 .slide-item:hover .slide-overlay {

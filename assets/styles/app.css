@@ -399,9 +399,16 @@ body {
     transition: all 0.3s;
 }
 
-.upload-label:hover {
+.upload-label:hover,
+.upload-label.drag-active {
     border-color: var(--primary-red);
     background-color: var(--light-gray);
+}
+
+.upload-label.drag-over {
+    border-color: var(--primary-red);
+    background-color: #ffe5e5;
+    border-style: solid;
 }
 
 .upload-icon {
@@ -429,8 +436,12 @@ body {
     background-color: var(--light-gray);
     border-radius: 4px;
     overflow: hidden;
-    cursor: move;
-    transition: transform 0.2s;
+    cursor: grab;
+    transition: transform 0.2s, opacity 0.2s, border 0.2s;
+}
+
+.slide-item:active {
+    cursor: grabbing;
 }
 
 .slide-item:hover {
@@ -438,7 +449,14 @@ body {
 }
 
 .slide-item.dragging {
-    opacity: 0.5;
+    opacity: 0.4;
+    transform: scale(0.95);
+    border: 2px dashed var(--primary-red);
+}
+
+.slide-item.drag-over {
+    border: 2px solid var(--primary-red);
+    background-color: rgba(200, 67, 59, 0.1);
 }
 
 .slide-handle {

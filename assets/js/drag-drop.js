@@ -3,60 +3,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const slidesGrid = document.getElementById('slides-grid');
     if (!slidesGrid) return;
 
-    const slideItems = slidesGrid.querySelectorAll('.slide-item');
     let draggedElement = null;
+    let draggedIndex = null;
 
-    slideItems.forEach(item => {
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragover', handleDragOver);
-        item.addEventListener('drop', handleDrop);
-        item.addEventListener('dragend', handleDragEnd);
+    console.log('Drag & drop initialized');
+
+    // Use event delegation for better performance and dynamic elements
+    slidesGrid.addEventListener('dragstart', function(e) {
+        if (e.target.classList.contains('slide-item')) {
+            draggedElement = e.target;
+            draggedElement.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+            console.log('Drag started:', draggedElement.dataset.slideId);
+        }
     });
 
-    function handleDragStart(e) {
-        draggedElement = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.innerHTML);
-    }
-
-    function handleDragOver(e) {
-        if (e.preventDefault) {
-            e.preventDefault();
-        }
+    slidesGrid.addEventListener('dragover', function(e) {
+        e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
 
+        // Remove all drag-over classes first
+        slidesGrid.querySelectorAll('.slide-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
+
         const targetElement = e.target.closest('.slide-item');
-        if (targetElement && targetElement !== draggedElement) {
-            const rect = targetElement.getBoundingClientRect();
-            const midpoint = rect.left + rect.width / 2;
+        if (targetElement && targetElement !== draggedElement && draggedElement) {
+            targetElement.classList.add('drag-over');
             
-            if (e.clientX < midpoint) {
-                targetElement.parentNode.insertBefore(draggedElement, targetElement);
-            } else {
+            const allSlides = Array.from(slidesGrid.querySelectorAll('.slide-item'));
+            const draggedIndex = allSlides.indexOf(draggedElement);
+            const targetIndex = allSlides.indexOf(targetElement);
+            
+            if (draggedIndex < targetIndex) {
                 targetElement.parentNode.insertBefore(draggedElement, targetElement.nextSibling);
+            } else {
+                targetElement.parentNode.insertBefore(draggedElement, targetElement);
             }
         }
+    });
 
-        return false;
-    }
+    slidesGrid.addEventListener('drop', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Remove drag-over classes
+        slidesGrid.querySelectorAll('.slide-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
+        
+        console.log('Drop completed');
+    });
 
-    function handleDrop(e) {
-        if (e.stopPropagation) {
-            e.stopPropagation();
+    slidesGrid.addEventListener('dragend', function(e) {
+        if (draggedElement) {
+            draggedElement.classList.remove('dragging');
+            console.log('Drag ended');
+            
+            // Update slide numbers
+            updateSlideNumbers();
+            
+            // Send new order to server
+            saveOrder();
+            
+            draggedElement = null;
         }
-        return false;
-    }
-
-    function handleDragEnd(e) {
-        this.classList.remove('dragging');
-        
-        // Update slide numbers
-        updateSlideNumbers();
-        
-        // Send new order to server
-        saveOrder();
-    }
+    });
 
     function updateSlideNumbers() {
         const slides = slidesGrid.querySelectorAll('.slide-item');
@@ -95,9 +108,65 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // File input preview
+    // File input preview and drag & drop upload
     const fileInput = document.getElementById('images');
     const selectedFilesDiv = document.getElementById('selected-files');
+    const uploadLabel = document.getElementById('upload-label');
+    const uploadForm = document.querySelector('.upload-form');
+    
+    // Prevent default drag behaviors ONLY for file drops outside upload area
+    // This prevents accidental file opening in browser
+    ['dragenter', 'dragover'].forEach(eventName => {
+        document.body.addEventListener(eventName, function(e) {
+            // Don't prevent if it's a slide being dragged
+            if (!e.target.closest('.slide-item') && !e.target.closest('#slides-grid')) {
+                e.preventDefault();
+            }
+        }, false);
+    });
+    
+    // Prevent file opening when dropped outside upload area
+    document.body.addEventListener('drop', function(e) {
+        if (!e.target.closest('#upload-label')) {
+            e.preventDefault();
+        }
+    }, false);
+    
+    // Highlight upload area when dragging files over it
+    if (uploadLabel) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadLabel.addEventListener(eventName, () => {
+                uploadLabel.style.borderColor = '#c8433b';
+                uploadLabel.style.backgroundColor = '#ffe5e5';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadLabel.addEventListener(eventName, () => {
+                uploadLabel.style.borderColor = '#ddd';
+                uploadLabel.style.backgroundColor = 'transparent';
+            }, false);
+        });
+
+        // Handle dropped files
+        uploadLabel.addEventListener('drop', handleFileDrop, false);
+    }
+
+    function handleFileDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            // Set files to input element
+            fileInput.files = files;
+            
+            // Trigger change event to show file list
+            const event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+            
+            console.log('Files dropped:', files.length);
+        }
+    }
     
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {

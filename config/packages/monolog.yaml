@@ -53,3 +53,8 @@ when@prod:
                 channels: [deprecation]
                 path: php://stderr
                 formatter: monolog.formatter.json
+            plik:
+              type: stream
+              path: "%kernel.logs_dir%/%kernel.environment%.log"
+              level: debug
+              channels: ["!event"]

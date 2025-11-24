@@ -1,6 +1,6 @@
-# Slideshow App - Aplikacja do pokazów slajdów
+# 📽️ CreativeSlajd - Aplikacja do pokazów slajdów
 
-Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zbudowana w Symfony 7.3.
+Nowoczesna aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zbudowana w Symfony 7.3.
 
 ## Funkcjonalności
 
@@ -29,11 +29,57 @@ Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zb
 - 📱 Responsywny design
 - ✨ Animacje i efekty przejść
 
-## Wymagania
+## 🚀 Quick Start - Docker (Production)
 
-- PHP 8.2 lub nowszy
+### Wymagania
+
+- Docker Engine 20.10+
+- Docker Compose v2.0+
+- Domena wskazująca na Twój serwer (dla automatycznego HTTPS)
+
+### Deployment w 5 krokach
+
+```bash
+# 1. Skopiuj konfigurację
+cp .env.production.example .env.production
+
+# 2. Wygeneruj klucze
+./deploy.sh generate-keys
+
+# 3. Edytuj .env.production i ustaw DOMAIN, APP_SECRET, DB_PASSWORD
+nano .env.production
+
+# 4. Waliduj konfigurację
+./deploy.sh validate
+
+# 5. Uruchom aplikację
+./deploy.sh start
+```
+
+**Gotowe!** Aplikacja jest dostępna na `https://twoja-domena.com` z automatycznym HTTPS!
+
+📚 **Pełna dokumentacja:** [QUICKSTART.md](QUICKSTART.md) | [DEPLOYMENT.md](DEPLOYMENT.md)
+
+### Zarządzanie aplikacją
+
+```bash
+./deploy.sh start       # Uruchom
+./deploy.sh stop        # Zatrzymaj
+./deploy.sh status      # Status
+./deploy.sh logs        # Logi
+./deploy.sh backup-db   # Backup
+./deploy.sh help        # Pełna lista
+```
+
+---
+
+## 🛠️ Development - Instalacja lokalna
+
+### Wymagania
+
+- PHP 8.3 lub nowszy
 - Composer
-- SQLite (lub PostgreSQL/MySQL)
+- PostgreSQL 16 (lub SQLite)
 
 ## Instalacja
 
@@ -182,10 +228,38 @@ Sprawdź połączenie w `.env` i uruchom ponownie migracje:
 php bin/console doctrine:migrations:migrate --no-interaction
 ```
 
-## Licencja
+## 🔒 Bezpieczeństwo (Docker)
 
-Proprietary
+- ✅ Automatyczne certyfikaty SSL (Let's Encrypt)
+- ✅ Automatyczne odnawianie certyfikatów
+- ✅ Security headers
+- ✅ HTTPS redirect
+- ✅ HTTP/2 i HTTP/3 support
+- ✅ Izolacja użytkowników
+- ✅ Token-based sharing
 
-## Autor
+## 🌐 Wielojęzyczność
 
-Created with ❤️ using Symfony
+- 🇵🇱 Polski (domyślny)
+- 🇬🇧 Angielski
+- 🇩🇪 Niemiecki
+
+Przełącznik języków w interfejsie, pełne tłumaczenia formularzy i komunikatów.
+
+## 📦 Backup (Docker)
+
+```bash
+# Backup bazy danych
+./deploy.sh backup-db
+
+# Przywróć z backupu
+./deploy.sh restore-db backup_20240101_120000.sql.gz
+```
+
+## 📝 Licencja
+
+CreativeSlajd © 2024
+
+## 👤 Autor
+
+Zbudowane z ❤️ używając Symfony 7.3, Caddy 2, Docker

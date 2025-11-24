@@ -18,3 +18,10 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> docker ###
+.env.production
+*.sql
+*.sql.gz
+backup_*
+###< docker ###

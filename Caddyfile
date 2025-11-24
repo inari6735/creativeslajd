@@ -1,0 +1,68 @@
+{
+    # Global options
+    admin off
+    email {$CADDY_EMAIL:admin@example.com}
+}
+
+{$DOMAIN:localhost} {
+    # Automatyczne HTTPS przez Let's Encrypt
+    # Caddy automatycznie uzyska i odnowi certyfikaty
+    
+    # Root directory
+    root * /var/www/html/public
+    
+    # Logowanie
+    log {
+        output stdout
+        format json
+        level {$LOG_LEVEL:INFO}
+    }
+
+    # Kompresja
+    encode gzip zstd
+
+    # PHP-FPM
+    php_fastcgi app:9000 {
+        # Symfony-specific
+        env SCRIPT_FILENAME /var/www/html/public/index.php
+        trusted_proxies private_ranges
+        resolve_root_symlink
+    }
+
+    # Obsługa plików statycznych
+    @static {
+        path *.css *.js *.ico *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot *.webp
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # Rewrite dla Symfony
+    @notStatic {
+        not path *.css *.js *.ico *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot *.webp
+    }
+    try_files {path} /index.php?{query}
+
+    # Security headers
+    header {
+        # Wyłącz niepotrzebne nagłówki
+        -Server
+        -X-Powered-By
+        
+        # Security headers
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # HSTS (włącz po upewnieniu się, że wszystko działa)
+        # Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+
+    # Blokuj dostęp do wrażliwych plików
+    @forbidden {
+        path /var/* /.env* /composer.* /symfony.lock /package*.json
+    }
+    respond @forbidden 404
+
+    # File server dla publicznych plików
+    file_server
+}

@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  # Caddy - Reverse Proxy z automatycznym HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: creativeslajd-caddy
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp" # HTTP/3 support
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - CADDY_EMAIL=${CADDY_EMAIL:-admin@example.com}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./public:/var/www/html/public:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - uploads:/var/www/html/public/uploads:ro
+    networks:
+      - creativeslajd
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:2019/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # PHP-FPM Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: creativeslajd-app
+    restart: unless-stopped
+    environment:
+      # Symfony
+      - APP_ENV=${APP_ENV:-prod}
+      - APP_SECRET=${APP_SECRET}
+      - DATABASE_URL=postgresql://${DB_USER:-app}:${DB_PASSWORD:-!ChangeMe!}@db:5432/${DB_NAME:-app}?serverVersion=${DB_VERSION:-16}&charset=utf8
+      - MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+      - MAILER_DSN=${MAILER_DSN:-null://null}
+      - DEFAULT_URI=https://${DOMAIN:-localhost}
+      
+      # Locale
+      - DEFAULT_LOCALE=${DEFAULT_LOCALE:-pl}
+      
+      # PHP
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-512M}
+      - PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-10M}
+      - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-10M}
+    volumes:
+      - uploads:/var/www/html/public/uploads
+      - app_var:/var/www/html/var
+    networks:
+      - creativeslajd
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # PostgreSQL Database
+  db:
+    image: postgres:${DB_VERSION:-16}-alpine
+    container_name: creativeslajd-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME:-app}
+      - POSTGRES_USER=${DB_USER:-app}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-!ChangeMe!}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - creativeslajd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app} -d ${DB_NAME:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: 
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+
+  # Migration Runner (uruchamia się raz przy starcie)
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: creativeslajd-migrations
+    environment:
+      - APP_ENV=${APP_ENV:-prod}
+      - APP_SECRET=${APP_SECRET}
+      - DATABASE_URL=postgresql://${DB_USER:-app}:${DB_PASSWORD:-!ChangeMe!}@db:5432/${DB_NAME:-app}?serverVersion=${DB_VERSION:-16}&charset=utf8
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - creativeslajd
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        sleep 5 &&
+        echo 'Running migrations...' &&
+        php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration &&
+        echo 'Migrations completed!'
+      "
+    restart: "no"
+
+networks:
+  creativeslajd:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+  uploads:
+    driver: local
+  app_var:
+    driver: local

@@ -1,3 +1,5 @@
+docker compose -f compose.yaml -f compose.prod.yaml --env-file .env.production up -d --build
+
 # Slideshow App - Aplikacja do pokazów slajdów
 
 Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zbudowana w Symfony 7.3.
@@ -5,6 +7,7 @@ Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zb
 ## Funkcjonalności
 
 ### Panel Administracyjny
+
 - ✅ Tworzenie i edycja pokazów slajdów
 - ✅ Upload wielu zdjęć jednocześnie (JPG, PNG, GIF)
 - ✅ Przeciąganie i upuszczanie do zmiany kolejności slajdów
@@ -12,20 +15,22 @@ Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zb
 - ✅ Podgląd miniatur w trybie edycji
 
 ### Odtwarzacz
+
 - ✅ Pełnoekranowy odtwarzacz pokazów
 - ✅ Automatyczne przełączanie slajdów (5 sekund)
 - ✅ Pasek postępu z animacją
 - ✅ Sterowanie klawiaturą:
-  - `←/→` - poprzedni/następny slajd
-  - `Spacja` - play/pauza
-  - `F` - pełny ekran
-  - `ESC` - wyjście
+    - `←/→` - poprzedni/następny slajd
+    - `Spacja` - play/pauza
+    - `F` - pełny ekran
+    - `ESC` - wyjście
 
 ### Design
+
 - 🎨 Kolorystyka w stylu Kudobox
-  - Primary Red: `#c8433b`
-  - Dark Gray: `#333333`
-  - Light Gray: `#f5f5f5`
+    - Primary Red: `#c8433b`
+    - Dark Gray: `#333333`
+    - Light Gray: `#f5f5f5`
 - 📱 Responsywny design
 - ✨ Animacje i efekty przejść
 
@@ -38,33 +43,39 @@ Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zb
 ## Instalacja
 
 1. Sklonuj repozytorium:
+
 ```bash
 git clone <repo-url>
 cd telewizorek
 ```
 
 2. Zainstaluj zależności:
+
 ```bash
 composer install
 ```
 
 3. Skonfiguruj bazę danych w pliku `.env`:
+
 ```env
 DATABASE_URL="sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db"
 ```
 
 4. Uruchom migracje:
+
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
 
 5. Utwórz katalog na uploady:
+
 ```bash
 mkdir -p public/uploads/slides
 chmod 777 public/uploads/slides
 ```
 
 6. Uruchom serwer deweloperski:
+
 ```bash
 symfony server:start
 # lub
@@ -72,6 +83,7 @@ php -S localhost:8000 -t public/
 ```
 
 7. Otwórz aplikację w przeglądarce:
+
 ```
 http://localhost:8000
 ```
@@ -144,6 +156,7 @@ Przeciągnij i upuść slajdy w żądanej kolejności. Zmiany są automatycznie 
 ### Zmiana czasu wyświetlania slajdu
 
 W pliku `templates/player/show.html.twig` zmień wartość:
+
 ```javascript
 const SLIDE_DURATION = 5000; // czas w milisekundach
 ```
@@ -151,6 +164,7 @@ const SLIDE_DURATION = 5000; // czas w milisekundach
 ### Zmiana maksymalnego rozmiaru pliku
 
 W pliku `src/Form/SlideType.php`:
+
 ```php
 'maxSize' => '10M', // zmień na np. '20M'
 ```
@@ -164,6 +178,7 @@ Domyślnie: JPG, JPEG, PNG, GIF
 ### Problem z uploadem plików
 
 Sprawdź uprawnienia do katalogu:
+
 ```bash
 chmod -R 777 public/uploads/slides
 ```
@@ -171,6 +186,7 @@ chmod -R 777 public/uploads/slides
 ### Brak stylów CSS
 
 Wyczyść cache:
+
 ```bash
 php bin/console cache:clear
 ```
@@ -178,6 +194,7 @@ php bin/console cache:clear
 ### Błędy bazy danych
 
 Sprawdź połączenie w `.env` i uruchom ponownie migracje:
+
 ```bash
 php bin/console doctrine:migrations:migrate --no-interaction
 ```

@@ -210,7 +210,11 @@
             const stopBtn = document.getElementById('youtube-stop-btn');
             const slideshowId = {{ slideshow.id }};
             const mercureUrl = '/.well-known/mercure';
-            const mercureTopic = 'slideshow/' + slideshowId + '/youtube';
+            const mercureYoutubeTopic = 'slideshow/' + slideshowId + '/youtube';
+            const mercureSlideshowTopic = 'slideshow/' + slideshowId;
+
+            // Initialize Mercure for slideshow updates
+            initializeMercureSlideshow();
 
             if (playBtn) {
                 playBtn.addEventListener('click', function() {
@@ -287,6 +291,56 @@
                     console.error('Error:', error);
                     alert('{{ 'slides.youtube_error'|trans }}');
                 });
+            }
+
+            // Mercure for live slideshow updates
+            function initializeMercureSlideshow() {
+                const url = new URL(mercureUrl, window.location.origin);
+                url.searchParams.append('topic', mercureSlideshowTopic);
+
+                console.log('Connecting to Mercure for slideshow updates:', url.toString());
+
+                const eventSource = new EventSource(url);
+
+                eventSource.onopen = () => {
+                    console.log('✅ Mercure slideshow connection established');
+                };
+
+                eventSource.onmessage = (event) => {
+                    console.log('📨 Mercure slideshow update received:', event.data);
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleSlideshowUpdate(data);
+                    } catch (error) {
+                        console.error('Error parsing Mercure data:', error);
+                    }
+                };
+
+                eventSource.onerror = (error) => {
+                    console.error('❌ Mercure slideshow connection error:', error);
+                };
+
+                window.addEventListener('beforeunload', () => {
+                    eventSource.close();
+                });
+            }
+
+            function handleSlideshowUpdate(data) {
+                console.log('🔄 Handling slideshow update:', data.action);
+                
+                if (data.slideshowId !== slideshowId) {
+                    console.log('⚠️ Ignoring update for different slideshow');
+                    return;
+                }
+
+                console.log('✅ Update for current slideshow - reloading page');
+                
+                // Simply reload the page to show updated slides
+                // This is simpler for edit view than rebuilding the grid
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
             }
         });
     </script>

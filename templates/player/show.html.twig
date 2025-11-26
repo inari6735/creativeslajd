@@ -441,14 +441,6 @@
                 pause();
             }
 
-            // Clear existing YouTube players
-            for (let slideId in youtubePlayers) {
-                if (youtubePlayers[slideId] && youtubePlayers[slideId].destroy) {
-                    youtubePlayers[slideId].destroy();
-                }
-            }
-            youtubePlayers = {};
-
             // Clear existing slides
             slidesContainer.innerHTML = '';
 

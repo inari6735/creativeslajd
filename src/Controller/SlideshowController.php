@@ -9,8 +9,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 
 #[Route('/slideshow')]
 #[IsGranted('ROLE_USER')]
@@ -91,5 +94,49 @@ class SlideshowController extends AbstractController
         }
 
         return $this->redirectToRoute('app_slideshow_index');
+    }
+
+    #[Route('/{id}/youtube-control', name: 'app_slideshow_youtube_control', methods: ['POST'])]
+    public function youtubeControl(
+        Request $request,
+        Slideshow $slideshow,
+        HubInterface $hub
+    ): JsonResponse {
+        // Check access (either owner or public editable)
+        if ($slideshow->getUser() !== $this->getUser() && !$slideshow->isPubliclyEditable()) {
+            return new JsonResponse(['success' => false, 'error' => 'Access denied'], 403);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['action'])) {
+            return new JsonResponse(['success' => false, 'error' => 'Missing action'], 400);
+        }
+
+        $action = $data['action'];
+        $videoId = $data['videoId'] ?? null;
+
+        // Publish to Mercure
+        $topic = sprintf('slideshow/%d/youtube', $slideshow->getId());
+        
+        $updateData = [
+            'action' => $action,
+            'videoId' => $videoId,
+            'slideshowId' => $slideshow->getId(),
+            'timestamp' => time(),
+        ];
+
+        $update = new Update(
+            $topic,
+            json_encode($updateData),
+            false
+        );
+
+        try {
+            $hub->publish($update);
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 }

@@ -44,6 +44,7 @@ slides:
   file_types: 'JPG, PNG, GIF (max 10MB)'
   file_types_media: 'JPG, PNG, GIF, MP4, WEBM (max 10MB)'
   add_photos: 'Dodaj zdjęcia'
+  add_button: 'Dodaj media'
   delete_confirm: 'Czy na pewno chcesz usunąć ten slajd?'
   selected_files: 'Wybrane pliki'
   files_selected: 'Wybrano %count% %files%'
@@ -51,6 +52,15 @@ slides:
   no_slides: 'Brak slajdów. Dodaj pierwsze zdjęcia do pokazu.'
   edit_button: 'Edytuj'
   play_button: 'Odtwórz'
+  youtube_live: 'Odtwarzanie YouTube na żywo'
+  youtube_play: 'Odtwórz'
+  youtube_stop: 'Zatrzymaj'
+  youtube_live_help: 'Wklej link do YouTube i kliknij "Odtwórz" aby odtworzyć film na wszystkich podłączonych odtwarzaczach. Kliknij "Zatrzymaj" aby wrócić do pokazu slajdów.'
+  youtube_empty: 'Proszę wpisać URL filmu YouTube'
+  youtube_invalid: 'Nieprawidłowy URL YouTube'
+  youtube_error: 'Błąd podczas wysyłania polecenia YouTube'
+  upload_section: 'Dodaj pliki do pokazu'
+  or: 'LUB'
 
 share:
   public_link: 'Link publiczny (odtwarzanie)'

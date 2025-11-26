@@ -16,6 +16,11 @@
 {% endblock %}
 
 {% block body %}
+<!-- YouTube Live Overlay - must be outside slideshow-player for proper z-index -->
+<div id="youtube-live-overlay" class="youtube-live-overlay" style="display: none;">
+    <div id="youtube-live-player"></div>
+</div>
+
 <div id="slideshow-player" class="slideshow-player" data-slideshow-id="{{ slideshow.id }}">
     <div class="slides-container">
         {% for slide in slideshow.slides %}
@@ -61,11 +66,45 @@
 
 {% block javascripts %}
     <script>
+        // Define YouTube API callback BEFORE loading the API script
+        var youtubeApiReady = false;
+        var youtubeApiReadyCallbacks = [];
+        
+        window.onYouTubeIframeAPIReady = function() {
+            console.log('✅ YouTube IFrame API is now ready');
+            youtubeApiReady = true;
+            
+            // Execute all pending callbacks
+            youtubeApiReadyCallbacks.forEach(function(callback) {
+                try {
+                    callback();
+                } catch (e) {
+                    console.error('Error in YouTube ready callback:', e);
+                }
+            });
+            youtubeApiReadyCallbacks = [];
+        };
+        
+        // Helper function to ensure API is ready before executing
+        function whenYouTubeReady(callback) {
+            if (youtubeApiReady) {
+                callback();
+            } else {
+                youtubeApiReadyCallbacks.push(callback);
+            }
+        }
+    </script>
+    
+    <!-- YouTube IFrame API - loaded AFTER defining the callback -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Player script loaded');
             
             const SLIDE_DURATION = 5000; // 5 sekund
         const MERCURE_TOPIC = '{{ mercureTopic }}';
+        const MERCURE_YOUTUBE_TOPIC = 'slideshow/{{ slideshow.id }}/youtube';
         const MERCURE_URL = '/.well-known/mercure';
         const SLIDESHOW_ID = {{ slideshow.id }};
         
@@ -75,6 +114,9 @@
         let progressInterval = null;
         let progressWidth = 0;
         let currentVideoEndedListener = null;
+        let youtubeLivePlayer = null; // Live YouTube player
+        let wasPlayingBeforeYoutube = false;
+        let pendingYoutubeVideo = null; // Queue for YouTube video if API not ready
 
         let slides = document.querySelectorAll('.slide');
         let totalSlides = slides.length;
@@ -114,6 +156,9 @@
                 const isActive = i === index;
                 slide.classList.toggle('active', isActive);
                 
+                const mediaType = slide.dataset.mediaType;
+                const slideId = slide.dataset.slideId;
+                
                 // Handle video playback
                 const video = slide.querySelector('video');
                 if (video) {
@@ -132,6 +177,8 @@
             // If playing, set up timer for next slide
             if (isPlaying) {
                 const currentSlideElement = slides[index];
+                const mediaType = currentSlideElement.dataset.mediaType;
+                const slideId = currentSlideElement.dataset.slideId;
                 const video = currentSlideElement.querySelector('video');
                 
                 if (video) {
@@ -371,6 +418,14 @@
                 pause();
             }
 
+            // Clear existing YouTube players
+            for (let slideId in youtubePlayers) {
+                if (youtubePlayers[slideId] && youtubePlayers[slideId].destroy) {
+                    youtubePlayers[slideId].destroy();
+                }
+            }
+            youtubePlayers = {};
+
             // Clear existing slides
             slidesContainer.innerHTML = '';
 
@@ -430,8 +485,166 @@
             console.log(`✨ Slideshow rebuilt with ${totalSlides} slides`);
         }
         
+        // YouTube Live Control Functions
+        function playYoutubeLive(videoId) {
+            console.log('📺 Requested to play YouTube:', videoId);
+            
+            const overlay = document.getElementById('youtube-live-overlay');
+            
+            if (!window.youtubeApiReady) {
+                console.warn('⏳ YouTube API not ready yet, queuing video...');
+                pendingYoutubeVideo = videoId;
+                
+                // Show loading message
+                overlay.style.display = 'flex';
+                overlay.innerHTML = '<div style="color: white; font-size: 24px; text-align: center;"><div style="margin-bottom: 20px;">⏳</div>Ładowanie YouTube API...<br><small style="font-size: 14px; opacity: 0.7; margin-top: 10px; display: block;">Czekam na gotowość API...</small></div>';
+                
+                // Use the helper function to wait for API
+                window.whenYouTubeReady(function() {
+                    console.log('🎬 API ready, now playing queued video:', pendingYoutubeVideo);
+                    if (pendingYoutubeVideo) {
+                        const queuedVideoId = pendingYoutubeVideo;
+                        pendingYoutubeVideo = null;
+                        playYoutubeLive(queuedVideoId);
+                    }
+                });
+                
+                return;
+            }
+
+            console.log('▶️ Playing YouTube Live:', videoId);
+
+            // Remember if slideshow was playing
+            wasPlayingBeforeYoutube = isPlaying;
+            
+            // Pause slideshow
+            if (isPlaying) {
+                pause();
+            }
+
+            // Show YouTube overlay
+            overlay.innerHTML = '<div id="youtube-live-player"></div>'; // Reset content
+            overlay.style.display = 'flex';
+
+            // Always create new player (clean slate approach)
+            if (youtubeLivePlayer) {
+                try {
+                    if (typeof youtubeLivePlayer.destroy === 'function') {
+                        youtubeLivePlayer.destroy();
+                    }
+                } catch (e) {
+                    console.warn('Could not destroy old player:', e);
+                }
+                youtubeLivePlayer = null;
+            }
+
+            // Create fresh player instance
+            try {
+                youtubeLivePlayer = new YT.Player('youtube-live-player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: videoId,
+                    playerVars: {
+                        'autoplay': 1,
+                        'controls': 1,
+                        'modestbranding': 1,
+                        'rel': 0,
+                        'fs': 1,
+                        'playsinline': 0,
+                    },
+                    events: {
+                        'onError': function(event) {
+                            console.error('YouTube player error:', event.data);
+                        },
+                        'onReady': function(event) {
+                            console.log('YouTube player ready');
+                            event.target.playVideo();
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to create YouTube player:', e);
+                overlay.innerHTML = '<div style="color: white; font-size: 24px; text-align: center;">❌<br>Błąd ładowania YouTube</div>';
+            }
+        }
+
+        function stopYoutubeLive() {
+            console.log('⏹️ Stopping YouTube Live');
+            
+            // Clear any pending video
+            pendingYoutubeVideo = null;
+            
+            // Hide overlay first (immediate visual feedback)
+            const overlay = document.getElementById('youtube-live-overlay');
+            overlay.style.display = 'none';
+
+            // Stop and destroy YouTube player (with error handling)
+            if (youtubeLivePlayer) {
+                try {
+                    if (typeof youtubeLivePlayer.stopVideo === 'function') {
+                        youtubeLivePlayer.stopVideo();
+                    }
+                } catch (e) {
+                    console.warn('Could not stop player:', e);
+                }
+                
+                try {
+                    if (typeof youtubeLivePlayer.destroy === 'function') {
+                        youtubeLivePlayer.destroy();
+                    }
+                } catch (e) {
+                    console.warn('Could not destroy player:', e);
+                }
+                
+                youtubeLivePlayer = null;
+            }
+
+            // Resume slideshow if it was playing
+            if (wasPlayingBeforeYoutube) {
+                setTimeout(() => play(), 100);
+            }
+        }
+
+        // Initialize Mercure for YouTube control
+        function initializeMercureYoutube() {
+            const url = new URL(MERCURE_URL, window.location.origin);
+            url.searchParams.append('topic', MERCURE_YOUTUBE_TOPIC);
+
+            console.log('Connecting to Mercure YouTube:', url.toString());
+
+            const eventSource = new EventSource(url);
+
+            eventSource.onopen = () => {
+                console.log('✅ Mercure YouTube connection established');
+            };
+
+            eventSource.onmessage = (event) => {
+                console.log('📨 Mercure YouTube update received:', event.data);
+                
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.action === 'play' && data.videoId) {
+                        playYoutubeLive(data.videoId);
+                    } else if (data.action === 'stop') {
+                        stopYoutubeLive();
+                    }
+                } catch (error) {
+                    console.error('Error parsing Mercure YouTube data:', error);
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('❌ Mercure YouTube connection error:', error);
+            };
+
+            window.addEventListener('beforeunload', () => {
+                eventSource.close();
+            });
+        }
+        
         // Initialize Mercure
         initializeMercure();
+        initializeMercureYoutube();
         
     }); // end DOMContentLoaded
     </script>

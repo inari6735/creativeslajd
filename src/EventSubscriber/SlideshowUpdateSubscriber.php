@@ -88,6 +88,8 @@ class SlideshowUpdateSubscriber
             'imagePath' => $slide->getImagePath(),
             'mediaType' => $slide->getMediaType(),
             'position' => $slide->getPosition(),
+            'youtubeUrl' => $slide->getYoutubeUrl(),
+            'youtubeVideoId' => $slide->getYoutubeVideoId(),
         ];
 
         // Prepare all slides for complete update
@@ -98,6 +100,8 @@ class SlideshowUpdateSubscriber
                 'imagePath' => $s->getImagePath(),
                 'mediaType' => $s->getMediaType(),
                 'position' => $s->getPosition(),
+                'youtubeUrl' => $s->getYoutubeUrl(),
+                'youtubeVideoId' => $s->getYoutubeVideoId(),
             ];
         }
 

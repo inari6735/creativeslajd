@@ -13,11 +13,14 @@ class Slide
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $imagePath = null;
 
     #[ORM\Column(length: 20)]
     private string $mediaType = 'image';
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $youtubeUrl = null;
 
     #[ORM\Column]
     private ?int $position = 0;
@@ -107,5 +110,38 @@ class Slide
     public function isVideo(): bool
     {
         return $this->mediaType === 'video';
+    }
+
+    public function getYoutubeUrl(): ?string
+    {
+        return $this->youtubeUrl;
+    }
+
+    public function setYoutubeUrl(?string $youtubeUrl): static
+    {
+        $this->youtubeUrl = $youtubeUrl;
+
+        return $this;
+    }
+
+    public function isYoutube(): bool
+    {
+        return $this->mediaType === 'youtube';
+    }
+
+    public function getYoutubeVideoId(): ?string
+    {
+        if (!$this->youtubeUrl) {
+            return null;
+        }
+
+        // Parse YouTube URL to extract video ID
+        // Supports: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+        $pattern = '/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/';
+        if (preg_match($pattern, $this->youtubeUrl, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

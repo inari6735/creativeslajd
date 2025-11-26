@@ -23,7 +23,7 @@
                  data-slide-id="{{ slide.id }}"
                  data-media-type="{{ slide.mediaType }}">
                 {% if slide.isVideo %}
-                    <video autoplay muted loop playsinline>
+                    <video muted playsinline>
                         <source src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" type="video/{{ slide.imagePath|split('.')|last }}">
                         Twoja przeglądarka nie obsługuje odtwarzania wideo.
                     </video>
@@ -74,6 +74,7 @@
         let slideInterval = null;
         let progressInterval = null;
         let progressWidth = 0;
+        let currentVideoEndedListener = null;
 
         let slides = document.querySelectorAll('.slide');
         let totalSlides = slides.length;
@@ -97,6 +98,18 @@
         }
 
         function showSlide(index) {
+            // Clear any existing video listener
+            if (currentVideoEndedListener) {
+                currentVideoEndedListener.removeEventListener('ended', handleVideoEnded);
+                currentVideoEndedListener = null;
+            }
+            
+            // Clear any existing intervals
+            clearInterval(slideInterval);
+            clearInterval(progressInterval);
+            slideInterval = null;
+            progressInterval = null;
+            
             slides.forEach((slide, i) => {
                 const isActive = i === index;
                 slide.classList.toggle('active', isActive);
@@ -115,6 +128,36 @@
             currentSlide = index;
             currentSlideSpan.textContent = index + 1;
             resetProgress();
+            
+            // If playing, set up timer for next slide
+            if (isPlaying) {
+                const currentSlideElement = slides[index];
+                const video = currentSlideElement.querySelector('video');
+                
+                if (video) {
+                    // For videos: wait for video to end
+                    currentVideoEndedListener = video;
+                    video.addEventListener('ended', handleVideoEnded);
+                    
+                    // Progress bar based on video duration
+                    progressInterval = setInterval(() => {
+                        if (video.duration > 0) {
+                            progressWidth = (video.currentTime / video.duration) * 100;
+                            progressBar.style.width = progressWidth + '%';
+                        }
+                    }, 50);
+                } else {
+                    // For images: use fixed duration
+                    slideInterval = setInterval(nextSlide, SLIDE_DURATION);
+                    progressInterval = setInterval(updateProgress, 50);
+                }
+            }
+        }
+        
+        function handleVideoEnded() {
+            if (isPlaying) {
+                nextSlide();
+            }
         }
 
         function nextSlide() {
@@ -148,8 +191,10 @@
             }
             isPlaying = true;
             playPauseBtn.textContent = '❚❚';
-            slideInterval = setInterval(nextSlide, SLIDE_DURATION);
-            progressInterval = setInterval(updateProgress, 50);
+            
+            // Trigger showSlide to set up appropriate timer/listener
+            showSlide(currentSlide);
+            
             console.log('Playback started');
         }
 
@@ -159,6 +204,21 @@
             playPauseBtn.textContent = '▶';
             clearInterval(slideInterval);
             clearInterval(progressInterval);
+            
+            // Remove video listener if exists
+            if (currentVideoEndedListener) {
+                currentVideoEndedListener.removeEventListener('ended', handleVideoEnded);
+                currentVideoEndedListener = null;
+            }
+            
+            // Pause current video if any
+            const currentSlideElement = slides[currentSlide];
+            if (currentSlideElement) {
+                const video = currentSlideElement.querySelector('video');
+                if (video) {
+                    video.pause();
+                }
+            }
         }
 
         function togglePlayPause() {
@@ -323,9 +383,8 @@
                 
                 if (slideData.mediaType === 'video') {
                     const video = document.createElement('video');
-                    video.autoplay = true;
+                    video.autoplay = false;
                     video.muted = true;
-                    video.loop = true;
                     video.playsInline = true;
                     
                     const source = document.createElement('source');

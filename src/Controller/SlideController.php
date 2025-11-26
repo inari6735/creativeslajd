@@ -24,7 +24,7 @@ class SlideController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         $files = $request->files->get('images');
-        
+
         // Debug: sprawdź co przychodzi
         if (!$files || (is_array($files) && count($files) === 0)) {
             $this->addFlash('error', 'Nie wybrano żadnych plików');
@@ -33,7 +33,7 @@ class SlideController extends AbstractController
 
         $uploadedCount = 0;
         $maxPosition = 0;
-        
+
         foreach ($slideshow->getSlides() as $existingSlide) {
             if ($existingSlide->getPosition() > $maxPosition) {
                 $maxPosition = $existingSlide->getPosition();
@@ -44,12 +44,19 @@ class SlideController extends AbstractController
             if ($file instanceof UploadedFile) {
                 try {
                     $fileName = $fileUploader->upload($file);
-                    
+                    $mimeType = $file->getClientMimeType();
+                    $mediaType = 'image';
+                    if (str_starts_with($mimeType, 'video/')) {
+                        $mediaType = 'video';
+                    }
+
                     $slide = new Slide();
                     $slide->setImagePath($fileName);
+                    $slide->setMediaType($mediaType);
                     $slide->setPosition(++$maxPosition);
                     $slide->setSlideshow($slideshow);
-                    
+
+
                     $entityManager->persist($slide);
                     $uploadedCount++;
                 } catch (\Exception $e) {
@@ -70,14 +77,14 @@ class SlideController extends AbstractController
     public function delete(Request $request, Slide $slide, EntityManagerInterface $entityManager): Response
     {
         $slideshowId = $slide->getSlideshow()->getId();
-        
+
         if ($this->isCsrfTokenValid('delete'.$slide->getId(), $request->request->get('_token'))) {
             // Delete physical file
             $filePath = $this->getParameter('slides_directory') . '/' . $slide->getImagePath();
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
-            
+
             $entityManager->remove($slide);
             $entityManager->flush();
 
@@ -91,7 +98,7 @@ class SlideController extends AbstractController
     public function reorder(Request $request, Slideshow $slideshow, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
+
         if (!isset($data['order'])) {
             return new JsonResponse(['success' => false, 'message' => 'Brak danych'], 400);
         }

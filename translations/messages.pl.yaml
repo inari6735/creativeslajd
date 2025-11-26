@@ -42,6 +42,7 @@ slides:
   manager: 'Slajdy (%count%)'
   drop_here: 'Kliknij lub przeciągnij zdjęcia tutaj'
   file_types: 'JPG, PNG, GIF (max 10MB)'
+  file_types_media: 'JPG, PNG, GIF, MP4, WEBM (max 10MB)'
   add_photos: 'Dodaj zdjęcia'
   delete_confirm: 'Czy na pewno chcesz usunąć ten slajd?'
   selected_files: 'Wybrane pliki'

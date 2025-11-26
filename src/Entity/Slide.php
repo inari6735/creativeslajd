@@ -16,6 +16,9 @@ class Slide
     #[ORM\Column(length: 255)]
     private ?string $imagePath = null;
 
+    #[ORM\Column(length: 20)]
+    private string $mediaType = 'image';
+
     #[ORM\Column]
     private ?int $position = 0;
 
@@ -82,5 +85,27 @@ class Slide
         $this->slideshow = $slideshow;
 
         return $this;
+    }
+
+    public function getMediaType(): string
+    {
+        return $this->mediaType;
+    }
+
+    public function setMediaType(string $mediaType): static
+    {
+        $this->mediaType = $mediaType;
+
+        return $this;
+    }
+
+    public function isImage(): bool
+    {
+        return $this->mediaType === 'image';
+    }
+
+    public function isVideo(): bool
+    {
+        return $this->mediaType === 'video';
     }
 }

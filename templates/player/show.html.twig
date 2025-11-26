@@ -19,8 +19,17 @@
 <div id="slideshow-player" class="slideshow-player" data-slideshow-id="{{ slideshow.id }}">
     <div class="slides-container">
         {% for slide in slideshow.slides %}
-            <div class="slide {% if loop.first %}active{% endif %}" data-slide-id="{{ slide.id }}">
-                <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="{{ slideshow.name }} - Slide {{ loop.index }}">
+            <div class="slide {% if loop.first %}active{% endif %}" 
+                 data-slide-id="{{ slide.id }}"
+                 data-media-type="{{ slide.mediaType }}">
+                {% if slide.isVideo %}
+                    <video autoplay muted loop playsinline>
+                        <source src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" type="video/{{ slide.imagePath|split('.')|last }}">
+                        Twoja przeglądarka nie obsługuje odtwarzania wideo.
+                    </video>
+                {% else %}
+                    <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="{{ slideshow.name }} - Slide {{ loop.index }}">
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -89,9 +98,18 @@
 
         function showSlide(index) {
             slides.forEach((slide, i) => {
-                slide.classList.remove('active');
-                if (i === index) {
-                    slide.classList.add('active');
+                const isActive = i === index;
+                slide.classList.toggle('active', isActive);
+                
+                // Handle video playback
+                const video = slide.querySelector('video');
+                if (video) {
+                    if (isActive) {
+                        video.currentTime = 0;
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
                 }
             });
             currentSlide = index;
@@ -261,17 +279,23 @@
             }
 
             function handleSlideshowUpdate(data) {
+                console.log('🔄 Handling slideshow update:', data.action);
+                console.log('📊 Slideshow ID match:', data.slideshowId, '===', SLIDESHOW_ID, '?', data.slideshowId === SLIDESHOW_ID);
+                console.log('📦 All slides:', data.allSlides);
+                
                 if (data.slideshowId !== SLIDESHOW_ID) {
+                    console.log('⚠️ Ignoring update for different slideshow');
                     return; // Update is for different slideshow
                 }
 
-                console.log('🔄 Handling slideshow update:', data.action);
+                console.log('✅ Processing update for current slideshow');
 
                 switch (data.action) {
                     case 'slide_added':
                     case 'slide_removed':
                     case 'slide_updated':
                         // Rebuild entire slideshow with new data
+                        console.log('🔨 Calling rebuildSlideshow with', data.allSlides.length, 'slides');
                         rebuildSlideshow(data.allSlides);
                         break;
                 }
@@ -295,12 +319,30 @@
                 const slideDiv = document.createElement('div');
                 slideDiv.className = 'slide';
                 slideDiv.dataset.slideId = slideData.id;
+                slideDiv.dataset.mediaType = slideData.mediaType;
                 
-                const img = document.createElement('img');
-                img.src = `/uploads/slides/${slideData.imagePath}`;
-                img.alt = `Slide ${index + 1}`;
+                if (slideData.mediaType === 'video') {
+                    const video = document.createElement('video');
+                    video.autoplay = true;
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true;
+                    
+                    const source = document.createElement('source');
+                    source.src = `/uploads/slides/${slideData.imagePath}`;
+                    const extension = slideData.imagePath.split('.').pop();
+                    source.type = `video/${extension}`;
+                    
+                    video.appendChild(source);
+                    slideDiv.appendChild(video);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = `/uploads/slides/${slideData.imagePath}`;
+                    img.alt = `Slide ${index + 1}`;
+                    
+                    slideDiv.appendChild(img);
+                }
                 
-                slideDiv.appendChild(img);
                 slidesContainer.appendChild(slideDiv);
             });
 

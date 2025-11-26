@@ -112,7 +112,7 @@
                        name="images[]" 
                        id="images"
                        multiple 
-                       accept="image/*" 
+                       accept="image/*,video/*" 
                        class="file-input"
                        data-file-upload-target="input"
                        data-action="change->file-upload#change">
@@ -122,7 +122,7 @@
                        data-action="dragenter->file-upload#dragEnter dragover->file-upload#dragOver dragleave->file-upload#dragLeave drop->file-upload#drop">
                     <div class="upload-icon">📤</div>
                     <div class="upload-text" data-file-upload-target="labelText">{{ 'slides.drop_here'|trans }}</div>
-                    <small>{{ 'slides.file_types'|trans }}</small>
+                    <small>{{ 'slides.file_types_media'|trans({'%default%': 'slides.file_types'|trans}) }}</small>
                 </label>
             </div>
             <div class="selected-files" style="display: none;" data-file-upload-target="filesList"></div>
@@ -137,10 +137,18 @@
                 {% for slide in slideshow.slides %}
                     <div class="slide-item" 
                          data-slide-id="{{ slide.id }}" 
+                         data-media-type="{{ slide.mediaType }}"
                          draggable="true"
                          data-action="dragstart->drag-drop#dragStart dragend->drag-drop#dragEnd">
                         <div class="slide-handle">⋮⋮</div>
-                        <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="Slide {{ loop.index }}">
+                        {% if slide.isVideo %}
+                            <video muted>
+                                <source src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" type="video/{{ slide.imagePath|split('.')|last }}">
+                            </video>
+                            <div class="media-badge">🎬 Video</div>
+                        {% else %}
+                            <img src="{{ asset('uploads/slides/' ~ slide.imagePath) }}" alt="Slide {{ loop.index }}">
+                        {% endif %}
                         <div class="slide-overlay">
                             <span class="slide-number">#{{ loop.index }}</span>
                             <form method="post" action="{{ path('app_slide_delete', {id: slide.id}) }}" onsubmit="return confirm('{{ 'slides.delete_confirm'|trans|escape('js') }}');">

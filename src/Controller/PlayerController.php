@@ -27,6 +27,7 @@ class PlayerController extends AbstractController
 
         return $this->render('player/show.html.twig', [
             'slideshow' => $slideshow,
+            'mercureTopic' => sprintf('slideshow/%d', $slideshow->getId()),
         ]);
     }
 }

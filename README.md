@@ -19,6 +19,7 @@ Aplikacja webowa do tworzenia i zarządzania pokazami slajdów ze zdjęciami, zb
 - ✅ Pełnoekranowy odtwarzacz pokazów
 - ✅ Automatyczne przełączanie slajdów (5 sekund)
 - ✅ Pasek postępu z animacją
+- ✅ **Real-time aktualizacje (Mercure)** - slajdy aktualizują się na żywo!
 - ✅ Sterowanie klawiaturą:
     - `←/→` - poprzedni/następny slajd
     - `Spacja` - play/pauza
@@ -87,6 +88,26 @@ php -S localhost:8000 -t public/
 ```
 http://localhost:8000
 ```
+
+## Real-time Updates (Mercure)
+
+Aplikacja wykorzystuje **Mercure** do automatycznych aktualizacji pokazów na żywo!
+
+### Jak to działa:
+- Gdy dodasz lub usuniesz slajd podczas edycji pokazu
+- Wszyscy, którzy oglądają ten pokaz (również publicznie)
+- **Automatycznie zobaczą zmiany bez odświeżania strony!**
+
+### Quick Start:
+```bash
+# Mercure jest już wbudowany w FrankenPHP - wystarczy uruchomić:
+docker compose up -d --build
+
+# Test:
+./test-mercure.sh
+```
+
+📖 **Więcej informacji:** [QUICKSTART_MERCURE.md](QUICKSTART_MERCURE.md)
 
 ## Struktura projektu
 

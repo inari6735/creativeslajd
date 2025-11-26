@@ -29,6 +29,7 @@ class PublicPlayerController extends AbstractController
         return $this->render('player/show.html.twig', [
             'slideshow' => $slideshow,
             'isPublicView' => true,
+            'mercureTopic' => sprintf('slideshow/%d', $slideshow->getId()),
         ]);
     }
 }

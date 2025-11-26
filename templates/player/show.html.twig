@@ -56,14 +56,18 @@
             console.log('Player script loaded');
             
             const SLIDE_DURATION = 5000; // 5 sekund
+        const MERCURE_TOPIC = '{{ mercureTopic }}';
+        const MERCURE_URL = '/.well-known/mercure';
+        const SLIDESHOW_ID = {{ slideshow.id }};
+        
         let currentSlide = 0;
         let isPlaying = false;
         let slideInterval = null;
         let progressInterval = null;
         let progressWidth = 0;
 
-        const slides = document.querySelectorAll('.slide');
-        const totalSlides = slides.length;
+        let slides = document.querySelectorAll('.slide');
+        let totalSlides = slides.length;
         
         console.log('Total slides:', totalSlides);
         console.log('Slides found:', slides);
@@ -220,6 +224,114 @@
 
             // Auto-start
             setTimeout(() => play(), 500);
-        }); // end DOMContentLoaded
+
+            // Initialize Mercure connection for live updates
+            function initializeMercure() {
+                const url = new URL(MERCURE_URL, window.location.origin);
+                url.searchParams.append('topic', MERCURE_TOPIC);
+
+                console.log('Connecting to Mercure:', url.toString());
+
+                const eventSource = new EventSource(url);
+
+                eventSource.onopen = () => {
+                    console.log('✅ Mercure connection established');
+                };
+
+                eventSource.onmessage = (event) => {
+                    console.log('📨 Mercure update received:', event.data);
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleSlideshowUpdate(data);
+                    } catch (error) {
+                        console.error('Error parsing Mercure data:', error);
+                    }
+                };
+
+                eventSource.onerror = (error) => {
+                    console.error('❌ Mercure connection error:', error);
+                    // EventSource will automatically reconnect
+                };
+
+                // Close connection when leaving page
+                window.addEventListener('beforeunload', () => {
+                    eventSource.close();
+                });
+            }
+
+            function handleSlideshowUpdate(data) {
+                if (data.slideshowId !== SLIDESHOW_ID) {
+                    return; // Update is for different slideshow
+                }
+
+                console.log('🔄 Handling slideshow update:', data.action);
+
+                switch (data.action) {
+                    case 'slide_added':
+                    case 'slide_removed':
+                    case 'slide_updated':
+                        // Rebuild entire slideshow with new data
+                        rebuildSlideshow(data.allSlides);
+                        break;
+                }
+            }
+
+            function rebuildSlideshow(newSlides) {
+            const slidesContainer = document.querySelector('.slides-container');
+            const wasPlaying = isPlaying;
+            const currentIndex = currentSlide;
+            
+            // Pause if playing
+            if (wasPlaying) {
+                pause();
+            }
+
+            // Clear existing slides
+            slidesContainer.innerHTML = '';
+
+            // Create new slides
+            newSlides.forEach((slideData, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'slide';
+                slideDiv.dataset.slideId = slideData.id;
+                
+                const img = document.createElement('img');
+                img.src = `/uploads/slides/${slideData.imagePath}`;
+                img.alt = `Slide ${index + 1}`;
+                
+                slideDiv.appendChild(img);
+                slidesContainer.appendChild(slideDiv);
+            });
+
+            // Update global slides reference
+            slides = document.querySelectorAll('.slide');
+            totalSlides = slides.length;
+            
+            // Update counter
+            document.getElementById('total-slides').textContent = totalSlides;
+
+            // Adjust current slide index if needed
+            if (currentIndex >= totalSlides) {
+                currentSlide = Math.max(0, totalSlides - 1);
+            } else {
+                currentSlide = currentIndex;
+            }
+
+            // Show current slide
+            showSlide(currentSlide);
+
+            // Resume playing if it was playing
+            if (wasPlaying && totalSlides > 0) {
+                setTimeout(() => play(), 100);
+            }
+
+            console.log(`✨ Slideshow rebuilt with ${totalSlides} slides`);
+        }
+        
+        // Initialize Mercure
+        initializeMercure();
+        
+    }); // end DOMContentLoaded
     </script>
 {% endblock %}

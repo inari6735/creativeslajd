@@ -569,19 +569,34 @@
                     videoId: videoId,
                     playerVars: {
                         'autoplay': 1,
+                        'mute': 1,  // MUST be muted for autoplay to work in browsers
                         'controls': 1,
                         'modestbranding': 1,
                         'rel': 0,
                         'fs': 1,
-                        'playsinline': 0,
+                        'playsinline': 1,
                     },
                     events: {
                         'onError': function(event) {
                             console.error('YouTube player error:', event.data);
                         },
                         'onReady': function(event) {
-                            console.log('YouTube player ready');
+                            console.log('YouTube player ready, starting playback...');
+                            // Explicitly start playback when ready
+                            event.target.unMute(); // Unmute after starting
                             event.target.playVideo();
+                        },
+                        'onStateChange': function(event) {
+                            // When video actually starts playing, unmute it
+                            if (event.data === YT.PlayerState.PLAYING) {
+                                console.log('YouTube video is playing');
+                                // Try to unmute (user may need to interact first due to browser policies)
+                                try {
+                                    event.target.unMute();
+                                } catch (e) {
+                                    console.warn('Could not unmute automatically:', e);
+                                }
+                            }
                         }
                     }
                 });
